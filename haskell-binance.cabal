@@ -10,6 +10,7 @@ maintainer:          dan.lucsanszky@gmail.com
 -- category:            
 build-type:          Simple
 extra-source-files:  ChangeLog.md
+                     README.md
 cabal-version:       >=1.10
 
 library
