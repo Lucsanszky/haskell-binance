@@ -33,13 +33,13 @@ Work in progress.
 
 ## WebSocket Streams Status
 
-- [ ] <symbol>@aggTrade
-- [ ] <symbol>@trade
-- [ ] <symbol>@kline_<interval>
-- [ ] <symbol>@ticker
+- [ ] &lt;symbol>@aggTrade
+- [ ] &lt;symbol>@trade
+- [ ] &lt;symbol>@kline_&lt;interval>
+- [ ] &lt;symbol>@ticker
 - [ ] !ticker@arr
-- [ ] <symbol>@depth<levels>
-- [x] <symbol>@depth
+- [ ] &lt;symbol>@depth&lt;levels>
+- [x] &lt;symbol>@depth
 
 ## Withdrawal API Status
 
