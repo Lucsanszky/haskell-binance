@@ -1,7 +1,4 @@
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE NamedFieldPuns        #-}
-{-# LANGUAGE OverloadedStrings     #-}
-{-# LANGUAGE TypeApplications      #-}
 
 module Main where
 
@@ -12,6 +9,12 @@ import           Network.HTTP.Client     (newManager)
 import           Network.HTTP.Client.TLS
     ( tlsManagerSettings
     )
+import           Prelude
+    ( Either (..)
+    , IO
+    , Maybe (..)
+    , print
+    )
 
 main :: IO ()
 main = do
@@ -20,6 +23,7 @@ main = do
     privKey <-
         B.readFile "/Users/dlucsanszky/.ssh/binance-key"
     man <- newManager tlsManagerSettings
+    -- Get the server time
     let config =
             H.BinanceConfig
             { H.url =
@@ -29,6 +33,7 @@ main = do
             , H.privateKey = privKey
             }
     t <- P.runReaderT (H.api H.getServerTime) config
+    -- Example to get all user orders for BNBBTC
     let params =
             H.OrderParams
             { H._symbol = "BNBBTC"
@@ -42,6 +47,7 @@ main = do
     case orders of
         Left err  -> print err
         Right res -> print res
+    -- Example of test order creation
     let params2 =
             H.TradeParams
             { H._symbol = "LTCBTC"
