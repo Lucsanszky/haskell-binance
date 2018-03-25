@@ -68,3 +68,5 @@ main = do
     case trade of
         Left err  -> print err
         Right res -> print res
+    -- Example diff. depth stream for BNBBTC
+    H.binanceDepth "BNBBTC" H.app
