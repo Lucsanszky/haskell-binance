@@ -23,7 +23,6 @@ app :: ClientApp ()
 app conn = do
     _ <-
         forkIO $
-  -- Fork a thread that writes WS data to stdout
         forever $ do
             msg <- receiveData conn
             liftIO $ putStrLn msg
@@ -40,7 +39,7 @@ binanceDepth sym =
     withSocketsDo .
     runSecureClient "stream.binance.com" 9443 path
   where
-    path = "/ws/" ++ unpack sym ++ "@depth"
+    path = "/ws/" ++ (map toLower . unpack) sym ++ "@depth"
 
 ------------------------------------------------------------
 -- BINANCE USER API
