@@ -1,31 +1,20 @@
-{-# LANGUAGE DataKinds         #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
-{-# LANGUAGE TypeOperators     #-}
-
 module Binance.Api
     ( module Binance.Type
     , app
-    , binanceDepth
     , allOrders
+    , BinanceAccountApi
+    , binanceDepth
+    , binanceProxy
     , getServerTime
     , testOrder
-    , binanceProxy
-    , BinanceAccountApi
     ) where
 
-import           Binance.Prelude
-import           Binance.Type
-import           Data.ByteString      (ByteString)
-import           Data.ByteString.Lazy (toStrict)
-import           Data.Char            (toLower)
-import           Prelude              hiding
-    ( getLine
-    , null
-    , putStrLn
-    , readFile
-    )
+import Binance.Prelude
+import Binance.Type
+import Data.ByteString (ByteString)
+import Data.ByteString.Lazy (toStrict)
+import Data.Char (toLower)
+import Prelude hiding (getLine, null, putStrLn, readFile)
 
 ------------------------------------------------------------
 -- BINANCE WEBSOCKET API
