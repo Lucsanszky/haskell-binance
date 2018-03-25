@@ -1,9 +1,4 @@
-{-# LANGUAGE DeriveGeneric              #-}
-{-# LANGUAGE DuplicateRecordFields      #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE NoImplicitPrelude          #-}
-{-# LANGUAGE OverloadedLists            #-}
-{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 
 module Binance.Type
     ( ServerTime(..)
