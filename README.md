@@ -41,7 +41,10 @@ Work in progress.
 - [ ] &lt;symbol>@depth&lt;levels>
 - [x] &lt;symbol>@depth
 
- * TODO: Create a type for the stream names
+- [x] Multiple stream support
+
+TODO: Add better error handling
+TODO: Deserialize stream results
 
 ## Withdrawal API Status
 
