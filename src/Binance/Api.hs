@@ -14,6 +14,7 @@ import Binance.Type
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy (toStrict)
 import Data.Char (toLower)
+import Data.List (intercalate)
 import Prelude hiding (getLine, null, putStrLn, readFile)
 
 ------------------------------------------------------------
@@ -35,13 +36,30 @@ app conn = do
             sendTextData conn line >> loop
 
 subscribeTo :: String -> ClientApp () -> IO ()
-subscribeTo s = withSocketsDo
-              . runSecureClient "stream.binance.com" 9443 s
+subscribeTo s =
+    withSocketsDo .
+    runSecureClient "stream.binance.com" 9443 s
 
-binanceStream :: String -> String -> ClientApp () -> IO ()
-binanceStream name sym = subscribeTo stream
+makeStreamName :: [(String, StreamType)] -> String
+makeStreamName ps =
+    base ++
+    intercalate
+        "/"
+        (map (\(sym, t) -> map toLower sym ++ show t) ps)
   where
-    stream = "/ws/" ++ map toLower sym ++ name
+    base =
+        if length ps == 1
+            then "/ws/"
+            else "/stream?streams="
+
+binanceStream ::
+       [(String, StreamType)] -> ClientApp () -> IO ()
+binanceStream [] =
+    error
+        "Please provide at least one symbol and stream type pair"
+binanceStream ps = subscribeTo stream
+  where
+    stream = makeStreamName ps
 
 ------------------------------------------------------------
 -- BINANCE USER API

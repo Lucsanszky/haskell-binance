@@ -10,6 +10,7 @@ module Binance.Type
     , Side(..)
     , OrderType(..)
     , Response(..)
+    , StreamType(..)
     ) where
 
 import           Binance.Prelude
@@ -169,3 +170,16 @@ instance ToForm TradeParams where
         opts = FormOptions {fieldLabelModifier = drop 1}
 
 instance FromForm TradeParams
+
+data StreamType
+    = AggTrade
+    | Trade
+    | Ticker
+    | Depth
+    deriving (Eq, Generic)
+
+instance Show StreamType where
+    show AggTrade = "@aggTrade"
+    show Trade    = "@trade"
+    show Ticker   = "@ticker"
+    show Depth    = "@depth"

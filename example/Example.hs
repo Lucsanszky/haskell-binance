@@ -68,5 +68,7 @@ main = do
     case trade of
         Left err  -> print err
         Right res -> print res
-    -- Example diff. depth stream for BNBBTC
-    H.binanceStream "@trade" "BNBBTC" H.app
+    -- Example streams
+    H.binanceStream
+        [("BNBBTC", H.Depth), ("BNBETH", H.AggTrade)]
+        H.app
