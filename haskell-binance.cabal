@@ -24,7 +24,7 @@ library
   -- other-extensions:    
 
   build-depends:       aeson
-                     , base >=4.9 && <4.10
+                     , base
                      , bytestring
                      , cryptonite
                      , http-api-data
@@ -39,7 +39,7 @@ library
                      , wuss
 
   hs-source-dirs:      src
-  
+
   default-language:    Haskell2010
 
   default-extensions:  DataKinds
@@ -52,13 +52,13 @@ library
                        RecordWildCards
                        TypeApplications
                        TypeOperators
-  
+
 executable examples
   hs-source-dirs:      example
 
   main-is:             Example.hs
 
-  build-depends:       base >=4.9 && <4.10
+  build-depends:       base
                      , bytestring
                      , haskell-binance
                      , http-client
