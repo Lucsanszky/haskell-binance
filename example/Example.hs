@@ -69,4 +69,4 @@ main = do
         Left err  -> print err
         Right res -> print res
     -- Example diff. depth stream for BNBBTC
-    H.binanceDepth "BNBBTC" H.app
+    H.binanceStream "@trade" "BNBBTC" H.app

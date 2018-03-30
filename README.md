@@ -33,13 +33,15 @@ Work in progress.
 
 ## WebSocket Streams Status
 
-- [ ] &lt;symbol>@aggTrade
-- [ ] &lt;symbol>@trade
+- [x] &lt;symbol>@aggTrade
+- [x] &lt;symbol>@trade
 - [ ] &lt;symbol>@kline_&lt;interval>
-- [ ] &lt;symbol>@ticker
+- [x] &lt;symbol>@ticker
 - [ ] !ticker@arr
 - [ ] &lt;symbol>@depth&lt;levels>
 - [x] &lt;symbol>@depth
+
+ * TODO: Create a type for the stream names
 
 ## Withdrawal API Status
 

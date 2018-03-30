@@ -3,7 +3,7 @@ module Binance.Api
     , app
     , allOrders
     , BinanceAccountApi
-    , binanceDepth
+    , binanceStream
     , binanceProxy
     , getServerTime
     , testOrder
@@ -34,12 +34,14 @@ app conn = do
             unless (null line) $
             sendTextData conn line >> loop
 
-binanceDepth :: Text -> ClientApp () -> IO ()
-binanceDepth sym =
-    withSocketsDo .
-    runSecureClient "stream.binance.com" 9443 path
+subscribeTo :: String -> ClientApp () -> IO ()
+subscribeTo s = withSocketsDo
+              . runSecureClient "stream.binance.com" 9443 s
+
+binanceStream :: String -> String -> ClientApp () -> IO ()
+binanceStream name sym = subscribeTo stream
   where
-    path = "/ws/" ++ (map toLower . unpack) sym ++ "@depth"
+    stream = "/ws/" ++ map toLower sym ++ name
 
 ------------------------------------------------------------
 -- BINANCE USER API
