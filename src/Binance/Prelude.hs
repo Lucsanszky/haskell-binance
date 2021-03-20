@@ -75,9 +75,10 @@ import           Servant.Client           as X
     , ClientEnv (..)
     , ClientM
     , Scheme (Https)
-    , ServantError
+    , ClientError
     , client
     , runClientM
+    , defaultMakeClientRequest
     )
 import           Web.FormUrlEncoded       as X
     ( FormOptions (..)

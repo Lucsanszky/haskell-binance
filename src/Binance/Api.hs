@@ -9,7 +9,7 @@ module Binance.Api
     , testOrder
     ) where
 
-import Binance.Prelude
+import Binance.Prelude hiding (manager)
 import Binance.Type
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy (toStrict)
@@ -111,11 +111,11 @@ allOrders' :<|> getServerTime' :<|> testOrder' =
 getServerTime :: BinanceUserApi Integer
 getServerTime = do
     url <- asks url
-    manager <- asks manager
+    man <- asks manager
     liftIO $ do
         Right (ServerTime time) <-
             runClientM getServerTime' $
-            ClientEnv manager url
+            ClientEnv man url Nothing defaultMakeClientRequest
         return time
 
 sign :: ByteString -> BinanceUserApi (Digest SHA256)
@@ -125,10 +125,10 @@ sign msg =
 
 allOrders ::
        OrderParams
-    -> BinanceUserApi (Either ServantError AllOrders)
+    -> BinanceUserApi (Either ClientError AllOrders)
 allOrders params@OrderParams {..} = do
     url <- asks url
-    manager <- asks manager
+    man <- asks manager
     pub <- asks publicKey
     let msg = urlEncodeAsForm params
     sig <- sign $ toStrict msg
@@ -142,14 +142,14 @@ allOrders params@OrderParams {..} = do
                  _recvWindow
                  (Just _timestamp)
                  (Just ((pack . show) sig))) $
-        ClientEnv manager url
+        ClientEnv man url Nothing defaultMakeClientRequest
 
 testOrder ::
        TradeParams
-    -> BinanceUserApi (Either ServantError Object)
+    -> BinanceUserApi (Either ClientError Object)
 testOrder params@TradeParams {..} = do
     url <- asks url
-    manager <- asks manager
+    man <- asks manager
     pub <- asks publicKey
     let msg = urlEncodeAsForm params
     sig <- sign $ toStrict msg
@@ -159,4 +159,4 @@ testOrder params@TradeParams {..} = do
                  (Just pub)
                  params
                  (Just ((pack . show) sig))) $
-        ClientEnv manager url
+        ClientEnv man url Nothing defaultMakeClientRequest
