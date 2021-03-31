@@ -36,56 +36,53 @@ app conn = do
             sendTextData conn line >> loop
 
 subscribeTo :: String -> ClientApp () -> IO ()
-subscribeTo s =
-    withSocketsDo .
-    runSecureClient "stream.binance.com" 9443 s
+subscribeTo s = withSocketsDo .  runSecureClient "stream.binance.com" 9443 s
 
 makeStreamName :: [(String, StreamType)] -> String
-makeStreamName ps =
-    base ++
-    intercalate
-        "/"
-        (map (\(sym, t) -> map toLower sym ++ show t) ps)
+makeStreamName ps = base ++
+    intercalate "/" (map (\(sym, t) -> map toLower sym ++ show t) ps)
   where
     base =
         if length ps == 1
             then "/ws/"
             else "/stream?streams="
 
-binanceStream ::
-       [(String, StreamType)] -> ClientApp () -> IO ()
-binanceStream [] =
-    error
-        "Please provide at least one symbol and stream type pair"
-binanceStream ps = subscribeTo stream
-  where
-    stream = makeStreamName ps
+binanceStream :: [(String, StreamType)] -> ClientApp () -> IO ()
+binanceStream [] = error "Please provide at least one symbol and stream type pair"
+binanceStream ps = subscribeTo $ makeStreamName ps
 
 ------------------------------------------------------------
 -- BINANCE USER API
 --
+type BinanceAccountApiTime =
+  "time" :>
+  Get '[ JSON] ServerTime
+
+type BinanceAccountApiAllOrders =
+  Header "X-MBX-APIKEY" Text :>
+  "allOrders" :>
+  QueryParam "symbol" Text :>
+  QueryParam "orderId" Integer :>
+  QueryParam "limit" Int :>
+  QueryParam "recvWindow" Integer :>
+  QueryParam "timestamp" Integer :>
+  QueryParam "signature" Text :>
+  Get '[ JSON] AllOrders
+
+type BinanceAccountApiTestOrder =
+  Header "X-MBX-APIKEY" Text :>
+  "order" :>
+  "test" :>
+  ReqBody '[ FormUrlEncoded] TradeParams :>
+  QueryParam "signature" Text :>
+  Post '[ JSON] Object
+
 type BinanceAccountApi
-     = "api"
-       :> (Header "X-MBX-APIKEY" Text
-           :> "v3"
-           :> "allOrders"
-           :> QueryParam "symbol" Text
-           :> QueryParam "orderId" Integer
-           :> QueryParam "limit" Int
-           :> QueryParam "recvWindow" Integer
-           :> QueryParam "timestamp" Integer
-           :> QueryParam "signature" Text
-           :> Get '[ JSON] AllOrders
-           :<|> "v1"
-           :> "time"
-           :> Get '[ JSON] ServerTime
-           :<|> Header "X-MBX-APIKEY" Text
-           :> "v3"
-           :> "order"
-           :> "test"
-           :> ReqBody '[ FormUrlEncoded] TradeParams
-           :> QueryParam "signature" Text
-           :> Post '[ JSON] Object)
+     = "api" :> "v3" :>
+        (    BinanceAccountApiTime
+        :<|> BinanceAccountApiAllOrders
+        :<|> BinanceAccountApiTestOrder
+        )
 
 binanceProxy :: Proxy BinanceAccountApi
 binanceProxy = Proxy
@@ -105,7 +102,7 @@ testOrder' ::
     -> TradeParams
     -> Maybe Text
     -> ClientM Object
-allOrders' :<|> getServerTime' :<|> testOrder' =
+getServerTime' :<|> allOrders' :<|> testOrder' =
     client binanceProxy
 
 getServerTime :: BinanceUserApi Integer

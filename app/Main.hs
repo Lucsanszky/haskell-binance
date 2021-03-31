@@ -11,10 +11,8 @@ import           Prelude ( Either (..) , IO , Maybe (..) , print , (>>))
 
 main :: IO ()
 main = do
-    pubKey <-
-        P.readFile "binance.pub"
-    privKey <-
-        B.readFile "binance.key"
+    pubKey <- P.readFile "binance.pub"
+    privKey <- B.readFile "binance.key"
     man <- newManager tlsManagerSettings
     -- Get the server time
     let config =
@@ -34,8 +32,7 @@ main = do
             , H._recvWindow = Nothing
             , H._timestamp = t
             }
-    orders <-
-        P.runReaderT (H.api (H.allOrders params)) config
+    orders <- P.runReaderT (H.api (H.allOrders params)) config
     case orders of
         Left err  -> print "Err: " >> print err
         Right res -> print "Res: " >> print res
@@ -61,6 +58,7 @@ main = do
         Left err  -> print "Err: " >> print err
         Right res -> print "Res: " >> print res
     -- Example streams
---    H.binanceStream
---        [("BNBBTC", H.Depth), ("BNBETH", H.AggTrade)]
---        H.app
+    H.binanceStream
+        [("BNBBTC", H.Depth), ("BNBETH", H.AggTrade)]
+        H.app
+
