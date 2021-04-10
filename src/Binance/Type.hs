@@ -3,6 +3,7 @@
 module Binance.Type
     ( ServerTime(..)
     , AllOrders
+    , Order(..)
     , OrderParams(..)
     , BinanceConfig(..)
     , BinanceUserApi(..)
@@ -77,10 +78,7 @@ data Order = Order
     } deriving (Eq, Show, Generic)
 
 instance FromJSON Order where
-    parseJSON = genericParseJSON opts
-      where
-        opts =
-            defaultOptions {A.fieldLabelModifier = drop 1}
+    parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = drop 1}
 
 instance ToJSON Order
 
@@ -98,8 +96,7 @@ instance ToHttpApiData Side where
 instance FromHttpApiData Side where
     parseUrlPiece "BUY" = Right BUY
     parseUrlPiece "SELL" = Right SELL
-    parseUrlPiece _ =
-        Left "Invalid side (should be BUY or SELL)"
+    parseUrlPiece _ = Left "Invalid side (should be BUY or SELL)"
 
 instance ToJSON Side
 
