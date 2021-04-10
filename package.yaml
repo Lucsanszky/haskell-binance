@@ -59,6 +59,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - haskell-binance
+    - hspec
 
 default-extensions:
 - DataKinds

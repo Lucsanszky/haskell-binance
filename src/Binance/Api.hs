@@ -77,11 +77,6 @@ type BinanceAccountApiTestOrder =
   QueryParam "signature" Text :>
   Post '[ JSON] Object
 
-type BinanceAccountApiDepth =
-  "depth" :>
-  QueryParam "symbol" Text :>
-  Get '[ JSON] ServerTime
-
 type BinanceAccountApi
      = "api" :> "v3" :>
         (    BinanceAccountApiTime
@@ -149,7 +144,7 @@ allOrders params@OrderParams {..} = do
 testOrder ::
        TradeParams
     -> BinanceUserApi (Either ClientError Object)
-testOrder params@TradeParams {..} = do
+testOrder params = do
     url <- asks url
     man <- asks manager
     pub <- asks publicKey
