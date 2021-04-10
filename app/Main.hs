@@ -7,7 +7,7 @@ import qualified Binance.Prelude         as P
 import qualified Data.ByteString         as B (readFile)
 import           Network.HTTP.Client     (newManager)
 import           Network.HTTP.Client.TLS ( tlsManagerSettings)
-import           Prelude ( Either (..) , IO , Maybe (..) , print , (>>))
+import           Prelude ( String , Either (..) , IO , Maybe (..) , print , (>>) )
 
 main :: IO ()
 main = do
@@ -34,8 +34,8 @@ main = do
             }
     orders <- P.runReaderT (H.api (H.allOrders params)) config
     case orders of
-        Left err  -> print "Err: " >> print err
-        Right res -> print "Res: " >> print res
+        Left err  -> print ("Err: "::String) >> print err
+        Right res -> print ("Res: "::String) >> print res
     -- Example of test order creation
     let params2 =
             H.TradeParams
@@ -55,8 +55,8 @@ main = do
     trade <-
         P.runReaderT (H.api (H.testOrder params2)) config
     case trade of
-        Left err  -> print "Err: " >> print err
-        Right res -> print "Res: " >> print res
+        Left err  -> print ("Err: "::String) >> print err
+        Right res -> print ("Res: "::String) >> print res
     -- Example streams
     H.binanceStream
         [("BNBBTC", H.Depth), ("BNBETH", H.AggTrade)]

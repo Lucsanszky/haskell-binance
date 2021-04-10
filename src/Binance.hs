@@ -5,4 +5,4 @@ module Binance
     ) where
 
 import           Binance.Api  as X
-import           Binance.Type as X
+-- import           Binance.Type as X
