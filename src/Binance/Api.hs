@@ -1,6 +1,5 @@
 module Binance.Api
     ( module Binance.Type
-    , app
     , allOrders
     , BinanceAccountApi
     , binanceStream
@@ -9,8 +8,9 @@ module Binance.Api
     , testOrder
     ) where
 
-import Binance.Prelude hiding (manager)
-import Binance.Type
+import Binance.Prelude
+import Binance.Type (StreamType, ServerTime(..), AllOrders, TradeParams(..), OrderParams(..), BinanceUserApi,
+                     publicKey, privateKey, url, managr, BinanceConfig(..), api, Side(..), OrderType(..), Order(..))
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy (toStrict)
 import Data.Char (toLower)
@@ -20,20 +20,20 @@ import Prelude hiding (getLine, null, putStrLn, readFile)
 ------------------------------------------------------------
 -- BINANCE WEBSOCKET API
 --
-app :: ClientApp ()
-app conn = do
-    _ <-
-        forkIO $
-        forever $ do
-            msg <- receiveData conn
-            liftIO $ putStrLn msg
-    loop
-    sendClose conn ("Bye!" :: Text)
-  where
-    loop =
-        getLine >>= \line ->
-            unless (null line) $
-            sendTextData conn line >> loop
+-- app :: ClientApp ()
+-- app conn = do
+--     _ <-
+--         forkIO $
+--         forever $ do
+--             msg <- receiveData conn
+--             liftIO $ putStrLn msg
+--     loop
+--     sendClose conn ("Bye!" :: Text)
+--   where
+--     loop =
+--         getLine >>= \line ->
+--             unless (null line) $
+--             sendTextData conn line >> loop
 
 subscribeTo :: String -> ClientApp () -> IO ()
 subscribeTo s = withSocketsDo .  runSecureClient "stream.binance.com" 9443 s
@@ -108,7 +108,7 @@ getServerTime' :<|> allOrders' :<|> testOrder' = client binanceProxy
 getServerTime :: BinanceUserApi Integer
 getServerTime = do
     url <- asks url
-    man <- asks manager
+    man <- asks managr
     liftIO $ do
         Right (ServerTime time) <-
             runClientM getServerTime' $
@@ -125,7 +125,7 @@ allOrders ::
     -> BinanceUserApi (Either ClientError AllOrders)
 allOrders params@OrderParams {..} = do
     url <- asks url
-    man <- asks manager
+    man <- asks managr
     pub <- asks publicKey
     let msg = urlEncodeAsForm params
     sig <- sign $ toStrict msg
@@ -146,7 +146,7 @@ testOrder ::
     -> BinanceUserApi (Either ClientError Object)
 testOrder params = do
     url <- asks url
-    man <- asks manager
+    man <- asks managr
     pub <- asks publicKey
     let msg = urlEncodeAsForm params
     sig <- sign $ toStrict msg

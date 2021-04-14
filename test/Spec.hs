@@ -19,7 +19,7 @@ defaultConfig = do
     man <- newManager tlsManagerSettings
     pure H.BinanceConfig
       { H.url = P.BaseUrl P.Https "api.binance.com" 443 ""
-      , H.manager = man
+      , H.managr = man
       , H.publicKey = pubKey
       , H.privateKey = privKey
       }

@@ -25,7 +25,7 @@ import           Prelude             hiding (String)
 --
 data BinanceConfig = BinanceConfig
     { url        :: !BaseUrl
-    , manager    :: !Manager
+    , managr     :: !Manager
     , publicKey  :: !Text
     , privateKey :: !ByteString
     }

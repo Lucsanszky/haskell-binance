@@ -3,26 +3,40 @@
 module Main where
 
 import qualified Binance                 as H
-import qualified Binance.Prelude         as P
+import           Binance.Prelude
 import qualified Data.ByteString         as B (readFile)
 import           Network.HTTP.Client     (newManager)
 import           Network.HTTP.Client.TLS ( tlsManagerSettings)
-import           Prelude -- ( String , Either (..) , IO , Maybe (..) , print , (>>) )
 
 defaultConfig :: IO H.BinanceConfig
 defaultConfig = do
-    pubKey <- P.readFile "binance.pub"
+    pubKey <- readFile "binance.pub"
     privKey <- B.readFile "binance.key"
     man <- newManager tlsManagerSettings
     pure H.BinanceConfig
-      { H.url = P.BaseUrl P.Https "api.binance.com" 443 ""
-      , H.manager = man
+      { H.url = BaseUrl Https "api.binance.com" 443 ""
+      , H.managr = man
       , H.publicKey = pubKey
       , H.privateKey = privKey
       }
 
+app :: ClientApp ()
+app conn = do
+    _ <-
+        forkIO $
+        forever $ do
+            msg <- receiveData conn
+            liftIO $ putStrLn msg
+    loop
+    sendClose conn ("Bye!" :: Text)
+  where
+    loop =
+        getLine >>= \line ->
+            unless (null line) $
+            sendTextData conn line >> loop
+
 main :: IO ()
-main = pure () -- do
+main = --pure () -- do
 --    config <- defaultConfig
     -- Example to get all user orders for BNBBTC
 --    case orders of
@@ -50,7 +64,7 @@ main = pure () -- do
 --        Left err  -> print ("Err: "::String) >> print err
 --        Right res -> print ("Res: "::String) >> print res
 --    -- Example streams
---    H.binanceStream
---        [("BNBBTC", H.Depth), ("BNBETH", H.AggTrade)]
---        H.app
+  H.binanceStream
+    [("BNBBTC", H.Depth), ("BNBETH", H.AggTrade)]
+    app
 
