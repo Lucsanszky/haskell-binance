@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Binance.Api
     ( module Binance.Type
     , allOrders
@@ -17,23 +19,6 @@ import Data.Char (toLower)
 import Data.List (intercalate)
 import Prelude hiding (getLine, null, putStrLn, readFile)
 
-------------------------------------------------------------
--- BINANCE WEBSOCKET API
---
--- app :: ClientApp ()
--- app conn = do
---     _ <-
---         forkIO $
---         forever $ do
---             msg <- receiveData conn
---             liftIO $ putStrLn msg
---     loop
---     sendClose conn ("Bye!" :: Text)
---   where
---     loop =
---         getLine >>= \line ->
---             unless (null line) $
---             sendTextData conn line >> loop
 
 subscribeTo :: String -> ClientApp () -> IO ()
 subscribeTo s = withSocketsDo .  runSecureClient "stream.binance.com" 9443 s

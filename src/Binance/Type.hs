@@ -1,4 +1,5 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Binance.Type
     ( ServerTime(..)
@@ -8,13 +9,16 @@ module Binance.Type
     , BinanceConfig(..)
     , BinanceUserApi(..)
     , TradeParams(..)
+    , TradeResponse(..)
     , Side(..)
     , OrderType(..)
     , Response(..)
     , StreamType(..)
     ) where
 
+import           Network.WebSockets (WebSocketsData(..), DataMessage(..))
 import           Binance.Prelude
+import           Data.Aeson (decode, encode)
 import qualified Data.Aeson.Types    as A (Options (..))
 import           Data.ByteString     (ByteString)
 import           Network.HTTP.Client (Manager)
@@ -180,3 +184,28 @@ instance Show StreamType where
     show Trade    = "@trade"
     show Ticker   = "@ticker"
     show Depth    = "@depth"
+
+data TradeResponse = TradeResponse 
+  { time :: Integer
+  , price :: Double
+  } deriving (Show, Eq)
+
+instance FromJSON TradeResponse where
+  parseJSON = withObject "TradeResponse" $ \o ->
+    TradeResponse
+      <$> o .: "T"
+      <*> (read <$> o .: "p")
+
+
+instance ToJSON TradeResponse where
+  toJSON TradeResponse{..} =
+    object [ "T" .= time
+           , "p" .= price
+           ]
+
+instance WebSocketsData (Maybe TradeResponse) where
+  fromDataMessage (Text s _) = fromLazyByteString s
+  fromDataMessage (Binary s) = fromLazyByteString s
+  fromLazyByteString = decode
+  toLazyByteString = encode
+

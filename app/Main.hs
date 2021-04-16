@@ -1,12 +1,24 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Main where
 
-import qualified Binance                 as H
-import           Binance.Prelude
-import qualified Data.ByteString         as B (readFile)
+
+import           Control.Concurrent (forkIO)
+import           Control.Monad (forever, unless)
+import           Control.Monad.IO.Class (liftIO)
+import           Data.Aeson (decodeStrict)
+import           Data.Function ((&))
+import           Data.Text
+import           Data.Text.IO (readFile, putStrLn, getLine)
 import           Network.HTTP.Client     (newManager)
 import           Network.HTTP.Client.TLS ( tlsManagerSettings)
+import           Network.WebSockets
+import           Prelude hiding (readFile, getLine, putStrLn)
+import           Servant.Client
+import qualified Binance                 as H
+import qualified Data.ByteString         as B (ByteString, readFile, unpack)
+import qualified Data.ByteString.Lazy as LB
 
 defaultConfig :: IO H.BinanceConfig
 defaultConfig = do
@@ -20,19 +32,20 @@ defaultConfig = do
       , H.privateKey = privKey
       }
 
+
 app :: ClientApp ()
 app conn = do
     _ <-
         forkIO $
         forever $ do
-            msg <- receiveData conn
-            liftIO $ putStrLn msg
+            msg :: Maybe H.TradeResponse <- receiveData conn
+            liftIO $ putStrLn ( msg & maybe "Foo" (pack . show) ) --  >>= decodeStrict & maybe "" show )
     loop
     sendClose conn ("Bye!" :: Text)
   where
     loop =
         getLine >>= \line ->
-            unless (null line) $
+            unless (Data.Text.null line) $
             sendTextData conn line >> loop
 
 main :: IO ()
@@ -65,6 +78,7 @@ main = --pure () -- do
 --        Right res -> print ("Res: "::String) >> print res
 --    -- Example streams
   H.binanceStream
-    [("BNBBTC", H.Depth), ("BNBETH", H.AggTrade)]
+    --[("BNBBTC", H.Depth), ("BNBETH", H.AggTrade)]
+    [("LINKUSDT", H.Trade)]
     app
 

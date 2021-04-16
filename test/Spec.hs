@@ -9,6 +9,7 @@ import Test.Hspec
 import qualified Binance                 as H
 import qualified Binance.Prelude         as P
 import qualified Data.ByteString         as B (readFile)
+import           Data.Aeson (decode)
 import Debug.Trace
 
 -- This is copy-pasted from the app, but really, there is no app
@@ -29,6 +30,8 @@ main = do
   config <- defaultConfig
   hspec $ do
     describe "All tests" $ do
+      it "decodes" $
+        decode "{\"e\":\"trade\",\"E\":1618586016940,\"s\":\"LINKUSDT\",\"t\":96946464,\"p\":\"40.38450000\",\"q\":\"161.37000000\",\"b\":1809872850,\"a\":1809872814,\"T\":1618586016910,\"m\":false,\"M\":true}" `shouldBe` Just (H.TradeResponse 1618586016910 40.38450000)
       it "Try time" $ do
         t <- P.runReaderT (H.api H.getServerTime) config
         t>1618037108339 `shouldBe` True
