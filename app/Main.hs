@@ -38,8 +38,8 @@ app conn = do
     _ <-
         forkIO $
         forever $ do
-            msg :: Maybe H.TradeResponse <- receiveData conn
-            liftIO $ putStrLn ( msg & maybe "Foo" (pack . show) ) --  >>= decodeStrict & maybe "" show )
+            msg :: Maybe H.WT <- receiveData conn
+            liftIO $ putStrLn ( msg & maybe "Unparsable" (pack . show) ) --  >>= decodeStrict & maybe "" show )
     loop
     sendClose conn ("Bye!" :: Text)
   where
@@ -78,7 +78,13 @@ main = --pure () -- do
 --        Right res -> print ("Res: "::String) >> print res
 --    -- Example streams
   H.binanceStream
-    --[("BNBBTC", H.Depth), ("BNBETH", H.AggTrade)]
-    [("LINKUSDT", H.Trade)]
+    [ ("ADAUSDT", H.Trade)
+    , ("LINKUSDT", H.Trade)
+    , ("XRPUSDT", H.Trade)
+    , ("BTCUSDT", H.Trade)
+    , ("ETHUSDT", H.Trade)
+    , ("DOTUSDT", H.Trade)
+    , ("LTCUSDT", H.Trade)
+    ]
     app
 

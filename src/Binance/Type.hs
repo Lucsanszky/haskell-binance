@@ -9,7 +9,8 @@ module Binance.Type
     , BinanceConfig(..)
     , BinanceUserApi(..)
     , TradeParams(..)
-    , TradeResponse(..)
+    , T(..)
+    , WT(..)
     , Side(..)
     , OrderType(..)
     , Response(..)
@@ -185,27 +186,58 @@ instance Show StreamType where
     show Ticker   = "@ticker"
     show Depth    = "@depth"
 
-data TradeResponse = TradeResponse 
-  { time :: Integer
+data T = T
+  { symbol :: Text
+  , time :: Integer
   , price :: Double
-  } deriving (Show, Eq)
+  } deriving (Eq)
 
-instance FromJSON TradeResponse where
-  parseJSON = withObject "TradeResponse" $ \o ->
-    TradeResponse
-      <$> o .: "T"
+instance FromJSON T where
+  parseJSON = withObject "T" $ \o ->
+    T
+      <$> o .: "s"
+      <*> o .: "T"
       <*> (read <$> o .: "p")
 
 
-instance ToJSON TradeResponse where
-  toJSON TradeResponse{..} =
-    object [ "T" .= time
+instance ToJSON T where
+  toJSON T{..} =
+    object [ "s" .= symbol
+           , "T" .= time
            , "p" .= price
            ]
 
-instance WebSocketsData (Maybe TradeResponse) where
+instance WebSocketsData (Maybe T) where
   fromDataMessage (Text s _) = fromLazyByteString s
   fromDataMessage (Binary s) = fromLazyByteString s
   fromLazyByteString = decode
   toLazyByteString = encode
 
+data WT = WT
+  { stream  :: Text
+  , payload :: T
+  } deriving (Eq)
+
+instance FromJSON WT where
+  parseJSON = withObject "WT" $ \o ->
+    WT
+      <$> o .: "stream"
+      <*> o .: "data"
+
+instance ToJSON WT where
+  toJSON WT{..} =
+    object [ "stream" .= stream
+           , "data"   .= payload
+           ]
+
+instance WebSocketsData (Maybe WT) where
+  fromDataMessage (Text s _) = fromLazyByteString s
+  fromDataMessage (Binary s) = fromLazyByteString s
+  fromLazyByteString = decode
+  toLazyByteString = encode
+
+instance Show T where
+  show (T s t p) = unpack s ++ " " ++ show t ++ " " ++ show p
+
+instance Show WT where
+  show (WT _ t) = show t
