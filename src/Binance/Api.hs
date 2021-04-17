@@ -19,6 +19,14 @@ import Data.Char (toLower)
 import Data.List (intercalate)
 import Prelude hiding (getLine, null, putStrLn, readFile)
 
+import Debug.Trace
+
+traceme :: Show a => String -> a -> a
+traceme s a = a `seq` traceShowPreF s id a
+
+traceShowPreF :: (Show b) => String -> (a -> b) -> a -> a
+traceShowPreF prefix f a = trace (prefix ++ show (f a)) a
+
 
 subscribeTo :: String -> ClientApp () -> IO ()
 subscribeTo s = withSocketsDo .  runSecureClient "stream.binance.com" 9443 s
@@ -58,7 +66,7 @@ type BinanceAccountApiTestOrder =
   Header "X-MBX-APIKEY" Text :>
   "order" :>
   "test" :>
-  ReqBody '[ FormUrlEncoded] TradeParams :>
+  ReqBody '[FormUrlEncoded] TradeParams :>
   QueryParam "signature" Text :>
   Post '[ JSON] Object
 
@@ -73,6 +81,7 @@ type BinanceAccountApi
 binanceProxy :: Proxy BinanceAccountApi
 binanceProxy = Proxy
 
+getServerTime' :: ClientM ServerTime
 allOrders' ::
        Maybe Text
     -> Maybe Text
@@ -82,7 +91,6 @@ allOrders' ::
     -> Maybe Integer
     -> Maybe Text
     -> ClientM AllOrders
-getServerTime' :: ClientM ServerTime
 testOrder' ::
        Maybe Text
     -> TradeParams
@@ -139,7 +147,7 @@ testOrder params = do
         runClientM
             (testOrder'
                  (Just pub)
-                 params
+                 (traceme "*** " params)
                  (Just ((pack . show) sig))) $
         ClientEnv man url Nothing defaultMakeClientRequest
 

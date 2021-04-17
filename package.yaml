@@ -60,6 +60,7 @@ tests:
     dependencies:
     - haskell-binance
     - hspec
+    - containers
 
 default-extensions:
 - DataKinds

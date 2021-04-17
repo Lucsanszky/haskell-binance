@@ -172,7 +172,8 @@ instance ToForm TradeParams where
       where
         opts = FormOptions {fieldLabelModifier = drop 1}
 
-instance FromForm TradeParams
+instance FromForm TradeParams where
+ 
 
 data StreamType
     = AggTrade

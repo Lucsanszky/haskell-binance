@@ -1,4 +1,6 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Main where
 
 import           Network.HTTP.Client     (newManager)
@@ -9,6 +11,7 @@ import Test.Hspec
 import qualified Binance                 as H
 import qualified Binance.Prelude         as P
 import qualified Data.ByteString         as B (readFile)
+import qualified Data.Map.Strict         as HM
 import           Data.Aeson (decode)
 import Debug.Trace
 
@@ -31,15 +34,33 @@ defaultConfig = do
       , H.publicKey = pubKey
       , H.privateKey = privKey
       }
+aTradeParams :: Integer -> H.TradeParams
+aTradeParams t = H.TradeParams
+                { H._symbol = "ADAGBP"
+                , H._side = H.BUY
+                , H._type = H.MARKET
+                , H._quantity = Nothing
+                , H._quoteOrderQty = Just 1
+                , H._timestamp = t
+                , H._timeInForce = Nothing
+                , H._price = Nothing
+                , H._newClientOrderId = Nothing
+                , H._stopPrice = Nothing
+                , H._icebergQty = Nothing
+                , H._newOrderRespType = Nothing
+                , H._recvWindow = Nothing
+                }
 
 main :: IO ()
 main = do
   config <- defaultConfig
   hspec $ do
     describe "All tests" $ do
-      it "decodes" $
+      it "Decodes" $
         decode "{\"e\":\"trade\",\"E\":1618586016940,\"s\":\"LINKUSDT\",\"t\":96946464,\"p\":\"40.38450000\",\"q\":\"161.37000000\",\"b\":1809872850,\"a\":1809872814,\"T\":1618586016910,\"m\":false,\"M\":true}" 
           `shouldBe` Just (H.T "LINKUSDT" 1618586016910 40.38450000)
+      it "To and from form" $
+         P.urlEncodeAsForm (aTradeParams 1) `shouldBe` "symbol=ADAGBP&quoteOrderQty=1.0&type=MARKET&side=BUY&timestamp=1"
       it "Try time" $ do
         t <- P.runReaderT (H.api H.getServerTime) config
         t>1618037108339 `shouldBe` True
@@ -59,22 +80,7 @@ main = do
         saneOrders orders `shouldBe` True
       it "Try test order" $ do
         t <- P.runReaderT (H.api H.getServerTime) config
-        let params =
-                H.TradeParams
-                { H._symbol = "ADAGBP"
-                , H._side = H.BUY
-                , H._type = H.MARKET
-                , H._quantity = Nothing
-                , H._quoteOrderQty = Just 1
-                , H._timestamp = t
-                , H._timeInForce = Nothing
-                , H._price = Nothing
-                , H._newClientOrderId = Nothing
-                , H._stopPrice = Nothing
-                , H._icebergQty = Nothing
-                , H._newOrderRespType = Nothing
-                , H._recvWindow = Nothing
-                }
+        let params = aTradeParams t
         trade <- P.runReaderT (H.api (H.testOrder params)) config
         saneTrade trade `shouldBe` True
 
