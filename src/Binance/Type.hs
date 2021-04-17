@@ -156,7 +156,8 @@ data TradeParams = TradeParams
     , _side             :: !Side
     , _type             :: !OrderType
     , _timeInForce      :: Maybe Text
-    , _quantity         :: !Double
+    , _quantity         :: Maybe Double
+    , _quoteOrderQty    :: Maybe Double
     , _price            :: Maybe Double
     , _newClientOrderId :: Maybe Text
     , _stopPrice        :: Maybe Double
@@ -239,5 +240,11 @@ instance WebSocketsData (Maybe WT) where
 instance Show T where
   show (T s t p) = unpack s ++ " " ++ show t ++ " " ++ show p
 
+instance Read T where
+  readsPrec _ s =
+    let (ss:ts:ps:_) = words s
+     in [(T (read ss) (read ts) (read ps), [])]
+
 instance Show WT where
   show (WT _ t) = show t
+
