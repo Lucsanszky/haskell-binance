@@ -61,6 +61,8 @@ main = do
           `shouldBe` Just (H.T "LINKUSDT" 1618586016910 40.38450000)
       it "To and from form" $
          P.urlEncodeAsForm (aTradeParams 1) `shouldBe` "symbol=ADAGBP&quoteOrderQty=1.0&type=MARKET&side=BUY&timestamp=1"
+      --it "To and from form 2" $
+      --   P.toEncodedUrlPiece (aTradeParams 1) `shouldBe` "symbol=ADAGBP&quoteOrderQty=1.0&type=MARKET&side=BUY&timestamp=1"
       it "Try time" $ do
         t <- P.runReaderT (H.api H.getServerTime) config
         t>1618037108339 `shouldBe` True
@@ -87,10 +89,11 @@ main = do
 
 saneOrders :: Either P.ClientError H.AllOrders -> Bool
 saneOrders (Left _) = False
-saneOrders (Right l) = length (traceme "&&&&& " l) > 1 && all (\p -> H._symbol (p::H.Order) == "ADAUSDT" ) l
+saneOrders (Right l) = length l > 1 && all (\p -> H._symbol (p::H.Order) == "ADAUSDT" ) l
 
 saneTrade :: Either P.ClientError P.Object -> Bool
-saneTrade (Left e) = trace (show e) False
+saneTrade (Left e) = -- traceme (show e) 
+                     False
 saneTrade (Right o) = True -- trace (show o) o == []
 
 -- FailureResponse (Request {requestPath = (BaseUrl {baseUrlScheme = Https, baseUrlHost = "api.binance.com", baseUrlPort = 443, baseUrlPath = ""},"/api/v3/order/test"), requestQueryString = fromList [("signature",Just "74d0513cb530c13ee200eb0f282f0eb94327137a1cf42f59fc1f45aa632f4118")], requestBody = Just ((),application/x-www-form-urlencoded), requestAccept =fromList [application/json;charset=utf-8,application/json], requestHeaders = fromList [("X-MBX-APIKEY","lLh49BpSIuoJeXsE2jepXyBZU4b9dOyQrGd9edQ2eaGm2UM2MC8gykDy1hxSAPtT")]), requestHttpVersion = HTTP/1.1, requestMethod = "POST"} 

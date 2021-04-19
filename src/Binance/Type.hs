@@ -25,6 +25,15 @@ import           Data.ByteString     (ByteString)
 import           Network.HTTP.Client (Manager)
 import           Prelude             hiding (String)
 
+
+import Debug.Trace
+
+traceme :: Show a => String -> a -> a
+traceme s a = a `seq` traceShowPreF s id a
+
+traceShowPreF :: (Show b) => String -> (a -> b) -> a -> a
+traceShowPreF prefix f a = trace (prefix ++ show (f a)) a
+
 ------------------------------------------------------------
 -- BINANCE DATA
 --
@@ -94,6 +103,10 @@ data Side
     | SELL
     deriving (Eq, Show, Generic)
 
+instance FromJSON Side
+
+instance ToJSON Side
+
 instance ToHttpApiData Side where
     toUrlPiece = pack . show
     toEncodedUrlPiece = unsafeToEncodedUrlPiece
@@ -103,7 +116,6 @@ instance FromHttpApiData Side where
     parseUrlPiece "SELL" = Right SELL
     parseUrlPiece _ = Left "Invalid side (should be BUY or SELL)"
 
-instance ToJSON Side
 
 data OrderType
     = LIMIT
@@ -114,6 +126,10 @@ data OrderType
     | TAKE_PROFIT_LIMIT
     | LIMIT_MAKER
     deriving (Eq, Show, Generic)
+
+instance FromJSON OrderType
+
+instance ToJSON OrderType
 
 instance ToHttpApiData OrderType where
     toUrlPiece = pack . show
@@ -128,8 +144,6 @@ instance FromHttpApiData OrderType where
     parseUrlPiece "TAKE_PROFIT_LIMIT" = Right TAKE_PROFIT
     parseUrlPiece "LIMIT_MAKER" = Right LIMIT_MAKER
     parseUrlPiece _ = Left "Invalid order type"
-
-instance ToJSON OrderType
 
 data Response
     = ACK
@@ -149,6 +163,8 @@ instance FromHttpApiData Response where
         Left
             "Invalid response type (should be ACK, RESULT or FULL)"
 
+instance FromJSON Response
+
 instance ToJSON Response
 
 data TradeParams = TradeParams
@@ -167,13 +183,30 @@ data TradeParams = TradeParams
     , _timestamp        :: !Integer
     } deriving (Eq, Show, Generic)
 
+instance FromJSON TradeParams where
+    parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = drop 1}
+
+instance ToJSON TradeParams
+
+instance ToHttpApiData TradeParams where
+    toUrlPiece = pack . show
+    toEncodedUrlPiece = unsafeToEncodedUrlPiece
+
+--instance FromHttpApiData TradeParams where
+--    parseUrlPiece "ACK" = Right ACK
+--    parseUrlPiece "RESULT" = Right RESULT
+--    parseUrlPiece "FULL" = Right FULL
+--    parseUrlPiece _ =
+--        Left
+--            "Invalid response type (should be ACK, RESULT or FULL)"
+
 instance ToForm TradeParams where
     toForm = genericToForm opts
       where
         opts = FormOptions {fieldLabelModifier = drop 1}
 
-instance FromForm TradeParams where
- 
+instance FromForm TradeParams
+
 
 data StreamType
     = AggTrade
@@ -244,7 +277,7 @@ instance Show T where
 instance Read T where
   readsPrec _ s =
     let (ss:ts:ps:_) = words s
-     in [(T (read ss) (read ts) (read ps), [])]
+     in [(T (pack ss) (read ts) (read ps), "")]
 
 instance Show WT where
   show (WT _ t) = show t

@@ -75,7 +75,6 @@ type BinanceAccountApi
         (    BinanceAccountApiTime
         :<|> BinanceAccountApiAllOrders
         :<|> BinanceAccountApiTestOrder
-    --    :<|> BinanceAccountApiDepth
         )
 
 binanceProxy :: Proxy BinanceAccountApi
@@ -147,7 +146,7 @@ testOrder params = do
         runClientM
             (testOrder'
                  (Just pub)
-                 (traceme "*** " params)
+                 params
                  (Just ((pack . show) sig))) $
         ClientEnv man url Nothing defaultMakeClientRequest
 
