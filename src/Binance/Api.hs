@@ -66,7 +66,12 @@ type BinanceAccountApiTestOrder =
   Header "X-MBX-APIKEY" Text :>
   "order" :>
   "test" :>
-  ReqBody '[FormUrlEncoded] TradeParams :>
+--  ReqBody '[FormUrlEncoded] TradeParams :>
+  QueryParam "quantity" Double :>
+  QueryParam "symbol" Text :>
+  QueryParam "type" OrderType :>
+  QueryParam "side" Side :>
+  QueryParam "timestamp" Integer :>
   QueryParam "signature" Text :>
   Post '[ JSON] Object
 
@@ -92,7 +97,12 @@ allOrders' ::
     -> ClientM AllOrders
 testOrder' ::
        Maybe Text
-    -> TradeParams
+  --  -> TradeParams
+    -> Maybe Double
+    -> Maybe Text
+    -> Maybe OrderType
+    -> Maybe Side
+    -> Maybe Integer
     -> Maybe Text
     -> ClientM Object
 getServerTime' :<|> allOrders' :<|> testOrder' = client binanceProxy
@@ -136,7 +146,7 @@ allOrders params@OrderParams {..} = do
 testOrder ::
        TradeParams
     -> BinanceUserApi (Either ClientError Object)
-testOrder params = do
+testOrder params@TradeParams{..} = do
     url <- asks url
     man <- asks managr
     pub <- asks publicKey
@@ -146,7 +156,11 @@ testOrder params = do
         runClientM
             (testOrder'
                  (Just pub)
-                 params
+                 _quantity
+                 (Just _symbol)
+                 (Just _type)
+                 (Just _side)
+                 (Just _timestamp)
                  (Just ((pack . show) sig))) $
         ClientEnv man url Nothing defaultMakeClientRequest
 

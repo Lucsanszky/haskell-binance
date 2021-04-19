@@ -171,22 +171,22 @@ data TradeParams = TradeParams
     { _symbol           :: !Text
     , _side             :: !Side
     , _type             :: !OrderType
-    , _timeInForce      :: Maybe Text
-    , _quantity         :: Maybe Double
-    , _quoteOrderQty    :: Maybe Double
-    , _price            :: Maybe Double
-    , _newClientOrderId :: Maybe Text
-    , _stopPrice        :: Maybe Double
-    , _icebergQty       :: Maybe Double
-    , _newOrderRespType :: Maybe Response
-    , _recvWindow       :: Maybe Integer
+    , _quantity         :: !(Maybe Double)
+--    , _quoteOrderQty    :: Maybe Double
+--    , _timeInForce      :: Maybe Text
+--    , _price            :: Maybe Double
+--    , _newClientOrderId :: Maybe Text
+--    , _stopPrice        :: Maybe Double
+--    , _icebergQty       :: Maybe Double
+--    , _newOrderRespType :: Maybe Response
+--    , _recvWindow       :: Maybe Integer
     , _timestamp        :: !Integer
     } deriving (Eq, Show, Generic)
 
-instance FromJSON TradeParams where
-    parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = drop 1}
+-- instance FromJSON TradeParams where
+--     parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = drop 1}
 
-instance ToJSON TradeParams
+-- instance ToJSON TradeParams
 
 instance ToHttpApiData TradeParams where
     toUrlPiece = pack . show

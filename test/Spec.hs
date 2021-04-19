@@ -34,21 +34,31 @@ defaultConfig = do
       , H.publicKey = pubKey
       , H.privateKey = privKey
       }
+
+aOrderParams :: Integer -> H.OrderParams
+aOrderParams t = H.OrderParams
+                { H._symbol = "ADAUSDT"
+                , H._orderId = Nothing
+                , H._limit = Nothing
+                , H._recvWindow = Nothing
+                , H._timestamp = t
+                }
+
 aTradeParams :: Integer -> H.TradeParams
 aTradeParams t = H.TradeParams
-                { H._symbol = "ADAGBP"
+                { H._symbol = "ADAUSDT"
                 , H._side = H.BUY
                 , H._type = H.MARKET
-                , H._quantity = Nothing
-                , H._quoteOrderQty = Just 1
+                , H._quantity = Just 10
+               -- , H._quoteOrderQty = Nothing
+               -- , H._timeInForce = Nothing
+               -- , H._price = Nothing
+               -- , H._newClientOrderId = Nothing
+               -- , H._stopPrice = Nothing
+               -- , H._icebergQty = Nothing
+               -- , H._newOrderRespType = Nothing
+               -- , H._recvWindow = Nothing
                 , H._timestamp = t
-                , H._timeInForce = Nothing
-                , H._price = Nothing
-                , H._newClientOrderId = Nothing
-                , H._stopPrice = Nothing
-                , H._icebergQty = Nothing
-                , H._newOrderRespType = Nothing
-                , H._recvWindow = Nothing
                 }
 
 main :: IO ()
@@ -59,8 +69,10 @@ main = do
       it "Decodes" $
         decode "{\"e\":\"trade\",\"E\":1618586016940,\"s\":\"LINKUSDT\",\"t\":96946464,\"p\":\"40.38450000\",\"q\":\"161.37000000\",\"b\":1809872850,\"a\":1809872814,\"T\":1618586016910,\"m\":false,\"M\":true}" 
           `shouldBe` Just (H.T "LINKUSDT" 1618586016910 40.38450000)
-      it "To and from form" $
-         P.urlEncodeAsForm (aTradeParams 1) `shouldBe` "symbol=ADAGBP&quoteOrderQty=1.0&type=MARKET&side=BUY&timestamp=1"
+      it "To and from form OrderParams" $
+         P.urlEncodeAsForm (aOrderParams 1) `shouldBe` "symbol=ADAUSDT&timestamp=1"
+      it "To and from form TradeParams" $
+         P.urlEncodeAsForm (aTradeParams 1) `shouldBe` "quantity=10.0&symbol=ADAUSDT&type=MARKET&side=BUY&timestamp=1"
       --it "To and from form 2" $
       --   P.toEncodedUrlPiece (aTradeParams 1) `shouldBe` "symbol=ADAGBP&quoteOrderQty=1.0&type=MARKET&side=BUY&timestamp=1"
       it "Try time" $ do
@@ -88,12 +100,11 @@ main = do
 
 
 saneOrders :: Either P.ClientError H.AllOrders -> Bool
-saneOrders (Left _) = False
+saneOrders (Left e) = trace (show e) False
 saneOrders (Right l) = length l > 1 && all (\p -> H._symbol (p::H.Order) == "ADAUSDT" ) l
 
 saneTrade :: Either P.ClientError P.Object -> Bool
-saneTrade (Left e) = -- traceme (show e) 
-                     False
+saneTrade (Left e) = trace (show e) False
 saneTrade (Right o) = True -- trace (show o) o == []
 
 -- FailureResponse (Request {requestPath = (BaseUrl {baseUrlScheme = Https, baseUrlHost = "api.binance.com", baseUrlPort = 443, baseUrlPath = ""},"/api/v3/order/test"), requestQueryString = fromList [("signature",Just "74d0513cb530c13ee200eb0f282f0eb94327137a1cf42f59fc1f45aa632f4118")], requestBody = Just ((),application/x-www-form-urlencoded), requestAccept =fromList [application/json;charset=utf-8,application/json], requestHeaders = fromList [("X-MBX-APIKEY","lLh49BpSIuoJeXsE2jepXyBZU4b9dOyQrGd9edQ2eaGm2UM2MC8gykDy1hxSAPtT")]), requestHttpVersion = HTTP/1.1, requestMethod = "POST"} 
