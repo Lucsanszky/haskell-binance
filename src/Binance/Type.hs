@@ -9,7 +9,7 @@ module Binance.Type
     , BinanceConfig(..)
     , BinanceUserApi(..)
     , TradeParams(..)
-    , T(..)
+    , Deal(..)
     , WT(..)
     , Side(..)
     , OrderType(..)
@@ -221,28 +221,28 @@ instance Show StreamType where
     show Ticker   = "@ticker"
     show Depth    = "@depth"
 
-data T = T
+data Deal = Deal
   { symbol :: Text
   , time :: Integer
   , price :: Double
   } deriving (Eq)
 
-instance FromJSON T where
+instance FromJSON Deal where
   parseJSON = withObject "T" $ \o ->
-    T
+    Deal
       <$> o .: "s"
       <*> o .: "T"
       <*> (read <$> o .: "p")
 
 
-instance ToJSON T where
-  toJSON T{..} =
+instance ToJSON Deal where
+  toJSON Deal{..} =
     object [ "s" .= symbol
            , "T" .= time
            , "p" .= price
            ]
 
-instance WebSocketsData (Maybe T) where
+instance WebSocketsData (Maybe Deal) where
   fromDataMessage (Text s _) = fromLazyByteString s
   fromDataMessage (Binary s) = fromLazyByteString s
   fromLazyByteString = decode
@@ -250,7 +250,7 @@ instance WebSocketsData (Maybe T) where
 
 data WT = WT
   { stream  :: Text
-  , payload :: T
+  , payload :: Deal
   } deriving (Eq)
 
 instance FromJSON WT where
@@ -271,13 +271,13 @@ instance WebSocketsData (Maybe WT) where
   fromLazyByteString = decode
   toLazyByteString = encode
 
-instance Show T where
-  show (T s t p) = unpack s ++ " " ++ show t ++ " " ++ show p
+instance Show Deal where
+  show (Deal s t p) = unpack s ++ " : " ++ show t ++ " " ++ show p
 
-instance Read T where
+instance Read Deal where
   readsPrec _ s =
     let (ss:ts:ps:_) = words s
-     in [(T (pack ss) (read ts) (read ps), "")]
+     in [(Deal (pack ss) (read ts) (read ps), "")]
 
 instance Show WT where
   show (WT _ t) = show t
