@@ -49,7 +49,7 @@ app conn = do
             sendTextData conn line >> loop
 
 showForFile :: H.WT -> String
-showForFile (H.WT s t p) = unpack s ++ " : " ++ show t ++ " " ++ show p
+showForFile (H.WT _ (H.Deal s t p)) = unpack s ++ " : " ++ show t ++ " " ++ show p
 
 main :: IO ()
 main = --pure () -- do
