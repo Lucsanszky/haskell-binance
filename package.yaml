@@ -34,6 +34,7 @@ dependencies:
 - text
 - websockets
 - wuss
+- time
 
 library:
   source-dirs: src

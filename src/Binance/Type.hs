@@ -17,6 +17,8 @@ module Binance.Type
     , StreamType(..)
     ) where
 
+import Data.Time.Format
+import Data.Time
 import           Network.WebSockets (WebSocketsData(..), DataMessage(..))
 import           Binance.Prelude
 import           Data.Aeson (decode, encode)
@@ -24,6 +26,7 @@ import qualified Data.Aeson.Types    as A (Options (..))
 import           Data.ByteString     (ByteString)
 import           Network.HTTP.Client (Manager)
 import           Prelude             hiding (String)
+import           Data.Text           (unpack)
 
 
 import Debug.Trace
@@ -272,7 +275,9 @@ instance WebSocketsData (Maybe WT) where
   toLazyByteString = encode
 
 instance Show Deal where
-  show (Deal s t p) = unpack s ++ " : " ++ show t ++ " " ++ show p
+  show (Deal s t p) =
+    let tm = parseTimeM True defaultTimeLocale "%s" (show $ t `div` 1000) :: Maybe UTCTime
+    in unpack s ++ " " ++ show tm ++ " " ++ show p
 
 instance Read Deal where
   readsPrec _ s =

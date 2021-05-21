@@ -39,7 +39,7 @@ app conn = do
         forkIO $
         forever $ do
             msg :: Maybe H.WT <- receiveData conn
-            liftIO $ putStrLn ( msg & maybe "Unparsable" (pack . show) ) --  >>= decodeStrict & maybe "" show )
+            liftIO $ putStrLn ( msg & maybe "Unparsable" (pack . showForFile) ) --  >>= decodeStrict & maybe "" show )
     loop
     sendClose conn ("Bye!" :: Text)
   where
@@ -48,40 +48,21 @@ app conn = do
             unless (Data.Text.null line) $
             sendTextData conn line >> loop
 
+showForFile :: H.WT -> String
+showForFile (H.WT s t p) = unpack s ++ " : " ++ show t ++ " " ++ show p
+
 main :: IO ()
 main = --pure () -- do
---    config <- defaultConfig
-    -- Example to get all user orders for BNBBTC
---    case orders of
---        Left err  -> print ("Err: "::String) >> print err
---        Right res -> print ("Res: "::String) >> print res
---    -- Example of test order creation
---    let params2 =
---            H.TradeParams
---            { H._symbol = "BTCLTC"
---            , H._side = H.BUY
---            , H._type = H.LIMIT
---            , H._timeInForce = Just "GTC"
---            , H._quantity = 1
---            , H._price = Just 0.1
---            , H._newClientOrderId = Nothing
---            , H._stopPrice = Nothing
---            , H._icebergQty = Just 0
---            , H._newOrderRespType = Just H.RESULT
---            , H._recvWindow = Just 5000
---            , H._timestamp = t
---            }
---    trade <-
---        P.runReaderT (H.api (H.testOrder params2)) config
---    case trade of
---        Left err  -> print ("Err: "::String) >> print err
---        Right res -> print ("Res: "::String) >> print res
---    -- Example streams
   H.binanceStream
     [ ("ADAUSDT", H.Trade)
     , ("LINKUSDT", H.Trade)
     , ("XRPUSDT", H.Trade)
+    , ("XLMUSDT", H.Trade)
+    , ("LINKUSDT", H.Trade)
     , ("BTCUSDT", H.Trade)
+    , ("BCHUSDT", H.Trade)
+    , ("BNBUSDT", H.Trade)
+    , ("XMRUSDT", H.Trade)
     , ("ETHUSDT", H.Trade)
     , ("DOTUSDT", H.Trade)
     , ("LTCUSDT", H.Trade)
