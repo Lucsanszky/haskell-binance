@@ -114,7 +114,7 @@ getServerTime = do
     liftIO $ do
         Right (ServerTime time) <-
             runClientM getServerTime' $
-            ClientEnv man url Nothing defaultMakeClientRequest
+            ClientEnv man url Nothing -- defaultMakeClientRequest
         return time
 
 sign :: ByteString -> BinanceUserApi (Digest SHA256)
@@ -141,7 +141,7 @@ allOrders params@OrderParams {..} = do
                  _recvWindow
                  (Just _timestamp)
                  (Just ((pack . show) sig))) $
-        ClientEnv man url Nothing defaultMakeClientRequest
+        ClientEnv man url Nothing -- defaultMakeClientRequest
 
 testOrder ::
        TradeParams
@@ -162,5 +162,5 @@ testOrder params@TradeParams{..} = do
                  (Just _side)
                  (Just _timestamp)
                  (Just ((pack . show) sig))) $
-        ClientEnv man url Nothing defaultMakeClientRequest
+        ClientEnv man url Nothing -- defaultMakeClientRequest
 

@@ -90,7 +90,6 @@ import           Servant.Client           as X
     , ClientError
     , client
     , runClientM
-    , defaultMakeClientRequest
     )
 import           Web.FormUrlEncoded       as X
     ( FormOptions (..)
