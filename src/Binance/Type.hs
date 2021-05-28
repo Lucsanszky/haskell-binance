@@ -3,7 +3,6 @@
 
 module Binance.Type
     ( ServerTime(..)
-    , AllOrders
     , Order(..)
     , OrderParams(..)
     , BinanceConfig(..)
@@ -19,6 +18,7 @@ module Binance.Type
 
 import Data.Time.Format
 import Data.Time
+import Data.Char
 import           Network.WebSockets (WebSocketsData(..), DataMessage(..))
 import           Binance.Prelude
 import           Data.Aeson (decode)
@@ -64,17 +64,17 @@ instance FromJSON ServerTime
 instance ToJSON ServerTime
 
 data OrderParams = OrderParams
-    { _symbol     :: !Text
-    , _orderId    :: Maybe Integer
-    , _limit      :: Maybe Int
-    , _recvWindow :: Maybe Integer
-    , _timestamp  :: !Integer
+    { opSymbol     :: !Text
+    , opOrderId    :: Maybe Integer
+    , opLimit      :: Maybe Int
+    , opRecvWindow :: Maybe Integer
+    , opTimestamp  :: !Integer
     } deriving (Eq, Show, Generic)
 
 instance ToForm OrderParams where
     toForm = genericToForm opts
       where
-        opts = FormOptions {fieldLabelModifier = drop 1}
+        opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 2 }
 
 data Order = Order
     { _symbol        :: !Text
@@ -98,7 +98,27 @@ instance FromJSON Order where
 
 instance ToJSON Order
 
-type AllOrders = [Order]
+-- data Order = Order
+--     { _symbol        :: !Text
+--     , _orderId       :: !Int
+--     , _clientOrderId :: !Text
+--     , _price         :: !Text
+--     , _origQty       :: !Text
+--     , _executedQty   :: !Text
+--     , _status        :: !Text
+--     , _timeInForce   :: !Text
+--     , _type          :: !Text
+--     , _side          :: !Text
+--     , _stopPrice     :: !Text
+--     , _icebergQty    :: !Text
+--     , _time          :: !Integer
+--     , _isWorking     :: !Bool
+--     } deriving (Eq, Show, Generic)
+-- 
+-- instance FromJSON Order where
+--     parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = drop 1}
+-- 
+-- instance ToJSON Order
 
 data Side
     = BUY
@@ -285,4 +305,8 @@ instance Read Deal where
 
 instance Show WT where
   show (WT _ t) = show t
+
+uncapitalizeFirst :: String -> String
+uncapitalizeFirst [] = []
+uncapitalizeFirst (a:as) = toLower a:as
 

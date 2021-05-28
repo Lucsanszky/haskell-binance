@@ -11,7 +11,7 @@ module Binance.Api
     ) where
 
 import Binance.Prelude
-import Binance.Type (StreamType, ServerTime(..), AllOrders, TradeParams(..), OrderParams(..), BinanceUserApi,
+import Binance.Type (StreamType, ServerTime(..), TradeParams(..), OrderParams(..), BinanceUserApi,
                      publicKey, privateKey, url, managr, BinanceConfig(..), api, Side(..), OrderType(..), Order(..))
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy (toStrict)
@@ -60,7 +60,7 @@ type BinanceAccountApiAllOrders =
   QueryParam "recvWindow" Integer :>
   QueryParam "timestamp" Integer :>
   QueryParam "signature" Text :>
-  Get '[ JSON] AllOrders
+  Get '[ JSON] [Order]
 
 -- type BinanceAccountApiMyTrades =
 --   Header "X-MBX-APIKEY" Text :>
@@ -71,7 +71,7 @@ type BinanceAccountApiAllOrders =
 --   QueryParam "recvWindow" Integer :>
 --   QueryParam "timestamp" Integer :>
 --   QueryParam "signature" Text :>
---   Get '[ JSON] AllOrders
+--   Get '[ JSON] [Order]
 
 type BinanceAccountApiTestOrder =
   Header "X-MBX-APIKEY" Text :>
@@ -106,7 +106,7 @@ allOrders' ::
     -> Maybe Integer
     -> Maybe Integer
     -> Maybe Text
-    -> ClientM AllOrders
+    -> ClientM [Order]
 testOrder' ::
        Maybe Text
   --  -> TradeParams
@@ -136,7 +136,7 @@ sign msg =
 
 allOrders ::
        OrderParams
-    -> BinanceUserApi (Either ClientError AllOrders)
+    -> BinanceUserApi (Either ClientError [Order])
 allOrders params@OrderParams {..} = do
     url <- asks url
     man <- asks managr
@@ -147,11 +147,11 @@ allOrders params@OrderParams {..} = do
         runClientM
             (allOrders'
                  (Just pub)
-                 (Just _symbol)
-                 _orderId
-                 _limit
-                 _recvWindow
-                 (Just _timestamp)
+                 (Just opSymbol)
+                 opOrderId
+                 opLimit
+                 opRecvWindow
+                 (Just opTimestamp)
                  (Just ((pack . show) sig))) $
         ClientEnv man url Nothing -- defaultMakeClientRequest
 

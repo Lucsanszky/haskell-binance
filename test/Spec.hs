@@ -37,11 +37,11 @@ defaultConfig = do
 
 aOrderParams :: Integer -> H.OrderParams
 aOrderParams t = H.OrderParams
-                { H._symbol = "ADAUSDT"
-                , H._orderId = Nothing
-                , H._limit = Nothing
-                , H._recvWindow = Nothing
-                , H._timestamp = t
+                { H.opSymbol = "ADAUSDT"
+                , H.opOrderId = Nothing
+                , H.opLimit = Nothing
+                , H.opRecvWindow = Nothing
+                , H.opTimestamp = t
                 }
 
 aTradeParams :: Integer -> H.TradeParams
@@ -84,11 +84,11 @@ main = do
         t <- P.runReaderT (H.api H.getServerTime) config
         let params =
                 H.OrderParams
-                { H._symbol = "ADAUSDT"
-                , H._orderId = Nothing
-                , H._limit = Nothing
-                , H._recvWindow = Nothing
-                , H._timestamp = t
+                { H.opSymbol = "ADAUSDT"
+                , H.opOrderId = Nothing
+                , H.opLimit = Nothing
+                , H.opRecvWindow = Nothing
+                , H.opTimestamp = t
                 }
         orders <- P.runReaderT (H.api (H.allOrders params)) config
         saneOrders orders `shouldBe` True
@@ -99,7 +99,7 @@ main = do
         saneTrade trade `shouldBe` True
 
 
-saneOrders :: Either P.ClientError H.AllOrders -> Bool
+saneOrders :: Either P.ClientError [H.Order] -> Bool
 saneOrders (Left e) = trace (show e) False
 saneOrders (Right l) = length l > 1 && all (\p -> H._symbol (p::H.Order) == "ADAUSDT" ) l
 
