@@ -99,9 +99,9 @@ main = do
         saneTrade trade `shouldBe` True
 
 
-saneOrders :: Either P.ClientError [H.Order] -> Bool
+saneOrders :: Either P.ClientError [H.OrderResponse] -> Bool
 saneOrders (Left e) = trace (show e) False
-saneOrders (Right l) = length l > 1 && all (\p -> H._symbol (p::H.Order) == "ADAUSDT" ) l
+saneOrders (Right l) = length l > 1 && all (\p -> H.orSymbol (p::H.OrderResponse) == "ADAUSDT" ) l
 
 saneTrade :: Either P.ClientError P.Object -> Bool
 saneTrade (Left e) = trace (show e) False

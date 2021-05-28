@@ -12,7 +12,7 @@ module Binance.Api
 
 import Binance.Prelude
 import Binance.Type (StreamType, ServerTime(..), TradeParams(..), OrderParams(..), BinanceUserApi,
-                     publicKey, privateKey, url, managr, BinanceConfig(..), api, Side(..), OrderType(..), Order(..))
+                     publicKey, privateKey, url, managr, BinanceConfig(..), api, Side(..), OrderType(..), OrderResponse(..))
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy (toStrict)
 import Data.Char (toLower)
@@ -60,7 +60,7 @@ type BinanceAccountApiAllOrders =
   QueryParam "recvWindow" Integer :>
   QueryParam "timestamp" Integer :>
   QueryParam "signature" Text :>
-  Get '[ JSON] [Order]
+  Get '[ JSON] [OrderResponse]
 
 -- type BinanceAccountApiMyTrades =
 --   Header "X-MBX-APIKEY" Text :>
@@ -106,7 +106,7 @@ allOrders' ::
     -> Maybe Integer
     -> Maybe Integer
     -> Maybe Text
-    -> ClientM [Order]
+    -> ClientM [OrderResponse]
 testOrder' ::
        Maybe Text
   --  -> TradeParams
@@ -136,7 +136,7 @@ sign msg =
 
 allOrders ::
        OrderParams
-    -> BinanceUserApi (Either ClientError [Order])
+    -> BinanceUserApi (Either ClientError [OrderResponse])
 allOrders params@OrderParams {..} = do
     url <- asks url
     man <- asks managr

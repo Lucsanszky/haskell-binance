@@ -3,7 +3,7 @@
 
 module Binance.Type
     ( ServerTime(..)
-    , Order(..)
+    , OrderResponse(..)
     , OrderParams(..)
     , BinanceConfig(..)
     , BinanceUserApi(..)
@@ -76,27 +76,27 @@ instance ToForm OrderParams where
       where
         opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 2 }
 
-data Order = Order
-    { _symbol        :: !Text
-    , _orderId       :: !Int
-    , _clientOrderId :: !Text
-    , _price         :: !Text
-    , _origQty       :: !Text
-    , _executedQty   :: !Text
-    , _status        :: !Text
-    , _timeInForce   :: !Text
-    , _type          :: !Text
-    , _side          :: !Text
-    , _stopPrice     :: !Text
-    , _icebergQty    :: !Text
-    , _time          :: !Integer
-    , _isWorking     :: !Bool
+data OrderResponse = OrderResponse
+    { orSymbol        :: !Text
+    , orOrderId       :: !Int
+    , orClientOrderId :: !Text
+    , orPrice         :: !Text
+    , orOrigQty       :: !Text
+    , orExecutedQty   :: !Text
+    , orStatus        :: !Text
+    , orTimeInForce   :: !Text
+    , orType          :: !Text
+    , orSide          :: !Text
+    , orStopPrice     :: !Text
+    , orIcebergQty    :: !Text
+    , orTime          :: !Integer
+    , orIsWorking     :: !Bool
     } deriving (Eq, Show, Generic)
 
-instance FromJSON Order where
-    parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = drop 1}
+instance FromJSON OrderResponse where
+    parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = uncapitalizeFirst . drop 2}
 
-instance ToJSON Order
+instance ToJSON OrderResponse
 
 -- data Order = Order
 --     { _symbol        :: !Text
