@@ -21,21 +21,20 @@ import Data.Time.Format
 import Data.Time
 import           Network.WebSockets (WebSocketsData(..), DataMessage(..))
 import           Binance.Prelude
-import           Data.Aeson (decode, encode)
+import           Data.Aeson (decode)
 import qualified Data.Aeson.Types    as A (Options (..))
 import           Data.ByteString     (ByteString)
 import           Network.HTTP.Client (Manager)
 import           Prelude             hiding (String)
-import           Data.Text           (unpack)
 
 
-import Debug.Trace
-
-traceme :: Show a => String -> a -> a
-traceme s a = a `seq` traceShowPreF s id a
-
-traceShowPreF :: (Show b) => String -> (a -> b) -> a -> a
-traceShowPreF prefix f a = trace (prefix ++ show (f a)) a
+-- import Debug.Trace
+-- 
+-- traceme :: Show a => String -> a -> a
+-- traceme s a = a `seq` traceShowPreF s id a
+-- 
+-- traceShowPreF :: (Show b) => String -> (a -> b) -> a -> a
+-- traceShowPreF prefix f a = trace (prefix ++ show (f a)) a
 
 ------------------------------------------------------------
 -- BINANCE DATA
@@ -104,7 +103,7 @@ type AllOrders = [Order]
 data Side
     = BUY
     | SELL
-    deriving (Eq, Show, Generic)
+    deriving (Eq, Show, Read, Generic)
 
 instance FromJSON Side
 

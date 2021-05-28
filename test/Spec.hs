@@ -25,8 +25,8 @@ traceShowPreF prefix f a = trace (prefix ++ show (f a)) a
 -- This is copy-pasted from the app, but really, there is no app
 defaultConfig :: IO H.BinanceConfig
 defaultConfig = do
-    pubKey <- P.readFile "../../binance.pub"
-    privKey <- B.readFile "../../binance.key"
+    pubKey <- P.readFile "../../binance.ad.pub"
+    privKey <- B.readFile "../../binance.ad.key"
     man <- newManager tlsManagerSettings
     pure H.BinanceConfig
       { H.url = P.BaseUrl P.Https "api.binance.com" 443 ""

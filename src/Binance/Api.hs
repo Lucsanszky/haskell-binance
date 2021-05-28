@@ -19,13 +19,13 @@ import Data.Char (toLower)
 import Data.List (intercalate)
 import Prelude hiding (getLine, null, putStrLn, readFile)
 
-import Debug.Trace
-
-traceme :: Show a => String -> a -> a
-traceme s a = a `seq` traceShowPreF s id a
-
-traceShowPreF :: (Show b) => String -> (a -> b) -> a -> a
-traceShowPreF prefix f a = trace (prefix ++ show (f a)) a
+-- import Debug.Trace
+-- 
+-- traceme :: Show a => String -> a -> a
+-- traceme s a = a `seq` traceShowPreF s id a
+-- 
+-- traceShowPreF :: (Show b) => String -> (a -> b) -> a -> a
+-- traceShowPreF prefix f a = trace (prefix ++ show (f a)) a
 
 
 subscribeTo :: String -> ClientApp () -> IO ()
@@ -62,6 +62,17 @@ type BinanceAccountApiAllOrders =
   QueryParam "signature" Text :>
   Get '[ JSON] AllOrders
 
+-- type BinanceAccountApiMyTrades =
+--   Header "X-MBX-APIKEY" Text :>
+--   "myTrades" :>
+--   QueryParam "symbol" Text :>
+--   QueryParam "fromId" Integer :>
+--   QueryParam "limit" Int :>
+--   QueryParam "recvWindow" Integer :>
+--   QueryParam "timestamp" Integer :>
+--   QueryParam "signature" Text :>
+--   Get '[ JSON] AllOrders
+
 type BinanceAccountApiTestOrder =
   Header "X-MBX-APIKEY" Text :>
   "order" :>
@@ -79,6 +90,7 @@ type BinanceAccountApi
      = "api" :> "v3" :>
         (    BinanceAccountApiTime
         :<|> BinanceAccountApiAllOrders
+     --   :<|> BinanceAccountApiMyTrades
         :<|> BinanceAccountApiTestOrder
         )
 
