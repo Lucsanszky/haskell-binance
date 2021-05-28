@@ -44,21 +44,21 @@ aOrderParams t = H.OrderParams
                 , H.opTimestamp = t
                 }
 
-aTradeParams :: Integer -> H.TradeParams
-aTradeParams t = H.TradeParams
-                { H._symbol = "ADAUSDT"
-                , H._side = H.BUY
-                , H._type = H.MARKET
-                , H._quantity = Just 10
-               -- , H._quoteOrderQty = Nothing
-               -- , H._timeInForce = Nothing
-               -- , H._price = Nothing
-               -- , H._newClientOrderId = Nothing
-               -- , H._stopPrice = Nothing
-               -- , H._icebergQty = Nothing
-               -- , H._newOrderRespType = Nothing
-               -- , H._recvWindow = Nothing
-                , H._timestamp = t
+aTestOrderParams :: Integer -> H.TestOrderParams
+aTestOrderParams t = H.TestOrderParams
+                { H.topSymbol = "ADAUSDT"
+                , H.topSide = H.BUY
+                , H.topType = H.MARKET
+                , H.topQuantity = Just 10
+               -- , H.topQuoteOrderQty = Nothing
+               -- , H.topTimeInForce = Nothing
+               -- , H.topPrice = Nothing
+               -- , H.topNewClientOrderId = Nothing
+               -- , H.topStopPrice = Nothing
+               -- , H.topIcebergQty = Nothing
+               -- , H.topNewOrderRespType = Nothing
+               -- , H.topRecvWindow = Nothing
+                , H.topTimestamp = t
                 }
 
 main :: IO ()
@@ -71,10 +71,10 @@ main = do
           `shouldBe` Just (H.Deal "LINKUSDT" 1618586016910 40.38450000)
       it "To and from form OrderParams" $
          P.urlEncodeAsForm (aOrderParams 1) `shouldBe` "symbol=ADAUSDT&timestamp=1"
-      it "To and from form TradeParams" $
-         P.urlEncodeAsForm (aTradeParams 1) `shouldBe` "quantity=10.0&symbol=ADAUSDT&type=MARKET&side=BUY&timestamp=1"
+      it "To and from form TestOrderParams" $
+         P.urlEncodeAsForm (aTestOrderParams 1) `shouldBe` "quantity=10.0&symbol=ADAUSDT&type=MARKET&side=BUY&timestamp=1"
       --it "To and from form 2" $
-      --   P.toEncodedUrlPiece (aTradeParams 1) `shouldBe` "symbol=ADAGBP&quoteOrderQty=1.0&type=MARKET&side=BUY&timestamp=1"
+      --   P.toEncodedUrlPiece (aTestOrderParams 1) `shouldBe` "symbol=ADAGBP&quoteOrderQty=1.0&type=MARKET&side=BUY&timestamp=1"
       it "Try time" $ do
         t <- P.runReaderT (H.api H.getServerTime) config
         t>1618037108339 `shouldBe` True
@@ -94,7 +94,7 @@ main = do
         saneOrders orders `shouldBe` True
       it "Try test order" $ do
         t <- P.runReaderT (H.api H.getServerTime) config
-        let params = aTradeParams t
+        let params = aTestOrderParams t
         trade <- P.runReaderT (H.api (H.testOrder params)) config
         saneTrade trade `shouldBe` True
 

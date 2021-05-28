@@ -7,7 +7,7 @@ module Binance.Type
     , OrderParams(..)
     , BinanceConfig(..)
     , BinanceUserApi(..)
-    , TradeParams(..)
+    , TestOrderParams(..)
     , Deal(..)
     , WT(..)
     , Side(..)
@@ -189,45 +189,28 @@ instance FromJSON Response
 
 instance ToJSON Response
 
-data TradeParams = TradeParams
-    { _symbol           :: !Text
-    , _side             :: !Side
-    , _type             :: !OrderType
-    , _quantity         :: !(Maybe Double)
---    , _quoteOrderQty    :: Maybe Double
---    , _timeInForce      :: Maybe Text
---    , _price            :: Maybe Double
---    , _newClientOrderId :: Maybe Text
---    , _stopPrice        :: Maybe Double
---    , _icebergQty       :: Maybe Double
---    , _newOrderRespType :: Maybe Response
---    , _recvWindow       :: Maybe Integer
-    , _timestamp        :: !Integer
+data TestOrderParams = TestOrderParams
+    { topSymbol           :: !Text
+    , topSide             :: !Side
+    , topType             :: !OrderType
+    , topQuantity         :: !(Maybe Double)
+--    , topQuoteOrderQty    :: Maybe Double
+--    , topTimeInForce      :: Maybe Text
+--    , topPrice            :: Maybe Double
+--    , topNewClientOrderId :: Maybe Text
+--    , topStopPrice        :: Maybe Double
+--    , topIcebergQty       :: Maybe Double
+--    , topNewOrderRespType :: Maybe Response
+--    , topRecvWindow       :: Maybe Integer
+    , topTimestamp        :: !Integer
     } deriving (Eq, Show, Generic)
 
--- instance FromJSON TradeParams where
---     parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = drop 1}
-
--- instance ToJSON TradeParams
-
-instance ToHttpApiData TradeParams where
-    toUrlPiece = pack . show
-    toEncodedUrlPiece = unsafeToEncodedUrlPiece
-
---instance FromHttpApiData TradeParams where
---    parseUrlPiece "ACK" = Right ACK
---    parseUrlPiece "RESULT" = Right RESULT
---    parseUrlPiece "FULL" = Right FULL
---    parseUrlPiece _ =
---        Left
---            "Invalid response type (should be ACK, RESULT or FULL)"
-
-instance ToForm TradeParams where
+instance ToForm TestOrderParams where
     toForm = genericToForm opts
       where
-        opts = FormOptions {fieldLabelModifier = drop 1}
+        opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 3}
 
-instance FromForm TradeParams
+instance FromForm TestOrderParams
 
 
 data StreamType

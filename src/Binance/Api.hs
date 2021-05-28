@@ -11,7 +11,8 @@ module Binance.Api
     ) where
 
 import Binance.Prelude
-import Binance.Type (StreamType, ServerTime(..), TradeParams(..), OrderParams(..), BinanceUserApi,
+import Binance.Type (StreamType, ServerTime(..), TestOrderParams(..),
+                     OrderParams(..), BinanceUserApi,
                      publicKey, privateKey, url, managr, BinanceConfig(..), api, Side(..), OrderType(..), OrderResponse(..))
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy (toStrict)
@@ -77,7 +78,7 @@ type BinanceAccountApiTestOrder =
   Header "X-MBX-APIKEY" Text :>
   "order" :>
   "test" :>
---  ReqBody '[FormUrlEncoded] TradeParams :>
+--  ReqBody '[FormUrlEncoded] TestOrderParams :>
   QueryParam "quantity" Double :>
   QueryParam "symbol" Text :>
   QueryParam "type" OrderType :>
@@ -109,7 +110,7 @@ allOrders' ::
     -> ClientM [OrderResponse]
 testOrder' ::
        Maybe Text
-  --  -> TradeParams
+  --  -> TestOrderParams
     -> Maybe Double
     -> Maybe Text
     -> Maybe OrderType
@@ -156,9 +157,9 @@ allOrders params@OrderParams {..} = do
         ClientEnv man url Nothing -- defaultMakeClientRequest
 
 testOrder ::
-       TradeParams
+       TestOrderParams
     -> BinanceUserApi (Either ClientError Object)
-testOrder params@TradeParams{..} = do
+testOrder params@TestOrderParams{..} = do
     url <- asks url
     man <- asks managr
     pub <- asks publicKey
@@ -168,11 +169,11 @@ testOrder params@TradeParams{..} = do
         runClientM
             (testOrder'
                  (Just pub)
-                 _quantity
-                 (Just _symbol)
-                 (Just _type)
-                 (Just _side)
-                 (Just _timestamp)
+                 topQuantity
+                 (Just topSymbol)
+                 (Just topType)
+                 (Just topSide)
+                 (Just topTimestamp)
                  (Just ((pack . show) sig))) $
         ClientEnv man url Nothing -- defaultMakeClientRequest
 
