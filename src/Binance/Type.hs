@@ -3,8 +3,10 @@
 
 module Binance.Type
     ( ServerTime(..)
-    , OrderResponse(..)
-    , OrderParams(..)
+    , AllOrdersParams(..)
+    , AllOrdersResponseLine(..)
+    , MyTradesParams(..)
+    , MyTradesResponseLine(..)
     , BinanceConfig(..)
     , BinanceUserApi(..)
     , TestOrderParams(..)
@@ -55,20 +57,22 @@ instance FromJSON ServerTime
 
 instance ToJSON ServerTime
 
-data OrderParams = OrderParams
-    { opSymbol     :: !Text
-    , opOrderId    :: Maybe Integer
-    , opLimit      :: Maybe Int
-    , opRecvWindow :: Maybe Integer
-    , opTimestamp  :: !Integer
+----------------------------------------
+
+data AllOrdersParams = AllOrdersParams
+    { aopSymbol     :: !Text
+    , aopOrderId    :: Maybe Integer
+    , aopLimit      :: Maybe Int
+    , aopRecvWindow :: Maybe Integer
+    , aopTimestamp  :: !Integer
     } deriving (Eq, Show, Generic)
 
-instance ToForm OrderParams where
+instance ToForm AllOrdersParams where
     toForm = genericToForm opts
       where
-        opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 2 }
+        opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 3 }
 
-data OrderResponse = OrderResponse
+data AllOrdersResponseLine = AllOrdersResponseLine
     { orSymbol        :: !Text
     , orOrderId       :: !Int
     , orClientOrderId :: !Text
@@ -85,32 +89,48 @@ data OrderResponse = OrderResponse
     , orIsWorking     :: !Bool
     } deriving (Eq, Show, Generic)
 
-instance FromJSON OrderResponse where
+instance FromJSON AllOrdersResponseLine where
     parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = uncapitalizeFirst . drop 2}
 
-instance ToJSON OrderResponse
+instance ToJSON AllOrdersResponseLine
 
--- data Order = Order
---     { _symbol        :: !Text
---     , _orderId       :: !Int
---     , _clientOrderId :: !Text
---     , _price         :: !Text
---     , _origQty       :: !Text
---     , _executedQty   :: !Text
---     , _status        :: !Text
---     , _timeInForce   :: !Text
---     , _type          :: !Text
---     , _side          :: !Text
---     , _stopPrice     :: !Text
---     , _icebergQty    :: !Text
---     , _time          :: !Integer
---     , _isWorking     :: !Bool
---     } deriving (Eq, Show, Generic)
--- 
--- instance FromJSON Order where
---     parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = drop 1}
--- 
--- instance ToJSON Order
+----------------------------------------
+
+data MyTradesParams = MyTradesParams
+    { mtpSymbol     :: !Text
+    , mtpFromId     :: Maybe Integer
+    , mtpLimit      :: Maybe Int
+    , mtpRecvWindow :: Maybe Integer
+    , mtpTimestamp  :: !Integer
+    } deriving (Eq, Show, Generic)
+
+instance ToForm MyTradesParams where
+    toForm = genericToForm opts
+      where
+        opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 3 }
+
+data MyTradesResponseLine = MyTradesResponseLine
+    { mtrSymbol           :: !Text
+    , mtrId               :: !Int
+    , mtrOrderId          :: !Int
+    , mtrOrderListId      :: !Int
+    , mtrPrice            :: !Text
+    , mtrQty              :: !Text
+    , mtrQuoteQty         :: !Text
+    , mtrCommission       :: !Text
+    , mtrCommissionAsset  :: !Text
+    , mtrTime             :: !Double
+    , mtrIsBuyer          :: !Bool
+    , mtrIsMaker          :: !Bool
+    , mtrIsBestMatch      :: !Bool
+    } deriving (Eq, Show, Generic)
+
+instance FromJSON MyTradesResponseLine where
+    parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = uncapitalizeFirst . drop 3}
+
+instance ToJSON MyTradesResponseLine
+
+----------------------------------------
 
 data Side
     = BUY

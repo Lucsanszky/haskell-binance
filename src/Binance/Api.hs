@@ -3,6 +3,7 @@
 module Binance.Api
     ( module Binance.Type
     , allOrders
+    , myTrades
     , BinanceAccountApi
     , binanceStream
     , binanceProxy
@@ -11,9 +12,12 @@ module Binance.Api
     ) where
 
 import Binance.Prelude
-import Binance.Type (StreamType, ServerTime(..), TestOrderParams(..),
-                     OrderParams(..), BinanceUserApi,
-                     publicKey, privateKey, url, managr, BinanceConfig(..), api, Side(..), OrderType(..), OrderResponse(..))
+import Binance.Type (StreamType, ServerTime(..), BinanceUserApi,
+                     TestOrderParams(..),
+                     AllOrdersParams(..), AllOrdersResponseLine(..),
+                     MyTradesParams(..), MyTradesResponseLine(..),
+                     publicKey, privateKey, url, managr, BinanceConfig(..), api, Side(..), OrderType(..),
+                     )
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy (toStrict)
 import Data.Char (toLower)
@@ -52,18 +56,18 @@ type BinanceAccountApiAllOrders =
   QueryParam "recvWindow" Integer :>
   QueryParam "timestamp" Integer :>
   QueryParam "signature" Text :>
-  Get '[ JSON] [OrderResponse]
+  Get '[ JSON] [AllOrdersResponseLine] -- it's a GET so you can't use the body
 
--- type BinanceAccountApiMyTrades =
---   Header "X-MBX-APIKEY" Text :>
---   "myTrades" :>
---   QueryParam "symbol" Text :>
---   QueryParam "fromId" Integer :>
---   QueryParam "limit" Int :>
---   QueryParam "recvWindow" Integer :>
---   QueryParam "timestamp" Integer :>
---   QueryParam "signature" Text :>
---   Get '[ JSON] [Order]
+type BinanceAccountApiMyTrades =
+  Header "X-MBX-APIKEY" Text :>
+  "myTrades" :>
+  QueryParam "symbol" Text :>
+  QueryParam "fromId" Integer :>
+  QueryParam "limit" Int :>
+  QueryParam "recvWindow" Integer :>
+  QueryParam "timestamp" Integer :>
+  QueryParam "signature" Text :>
+  Get '[ JSON] [MyTradesResponseLine]
 
 type BinanceAccountApiTestOrder =
   Header "X-MBX-APIKEY" Text :>
@@ -77,7 +81,7 @@ type BinanceAccountApi
      = "api" :> "v3" :>
         (    BinanceAccountApiTime
         :<|> BinanceAccountApiAllOrders
-     --   :<|> BinanceAccountApiMyTrades
+        :<|> BinanceAccountApiMyTrades
         :<|> BinanceAccountApiTestOrder
         )
 
@@ -93,13 +97,22 @@ allOrders' ::
     -> Maybe Integer
     -> Maybe Integer
     -> Maybe Text
-    -> ClientM [OrderResponse]
+    -> ClientM [AllOrdersResponseLine]
+myTrades' ::
+       Maybe Text
+    -> Maybe Text
+    -> Maybe Integer
+    -> Maybe Int
+    -> Maybe Integer
+    -> Maybe Integer
+    -> Maybe Text
+    -> ClientM [MyTradesResponseLine]
 testOrder' ::
        Maybe Text
     -> TestOrderParams
     -> Maybe Text
     -> ClientM Object
-getServerTime' :<|> allOrders' :<|> testOrder' = client binanceProxy
+getServerTime' :<|> allOrders' :<|> myTrades' :<|> testOrder' = client binanceProxy
 
 getServerTime :: BinanceUserApi Integer
 getServerTime = do
@@ -117,9 +130,9 @@ sign msg =
         return . hmacGetDigest . hmac secret $ msg
 
 allOrders ::
-       OrderParams
-    -> BinanceUserApi (Either ClientError [OrderResponse])
-allOrders params@OrderParams {..} = do
+       AllOrdersParams
+    -> BinanceUserApi (Either ClientError [AllOrdersResponseLine])
+allOrders params@AllOrdersParams {..} = do
     url <- asks url
     man <- asks managr
     pub <- asks publicKey
@@ -129,11 +142,32 @@ allOrders params@OrderParams {..} = do
         runClientM
             (allOrders'
                  (Just pub)
-                 (Just opSymbol)
-                 opOrderId
-                 opLimit
-                 opRecvWindow
-                 (Just opTimestamp)
+                 (Just aopSymbol)
+                 aopOrderId
+                 aopLimit
+                 aopRecvWindow
+                 (Just aopTimestamp)
+                 (Just ((pack . show) sig))) $
+        ClientEnv man url Nothing -- defaultMakeClientRequest
+
+myTrades ::
+       MyTradesParams
+    -> BinanceUserApi (Either ClientError [MyTradesResponseLine])
+myTrades params@MyTradesParams {..} = do
+    url <- asks url
+    man <- asks managr
+    pub <- asks publicKey
+    let msg = urlEncodeAsForm params
+    sig <- sign $ toStrict msg
+    liftIO $
+        runClientM
+            (myTrades'
+                 (Just pub)
+                 (Just mtpSymbol)
+                 mtpFromId
+                 mtpLimit
+                 mtpRecvWindow
+                 (Just mtpTimestamp)
                  (Just ((pack . show) sig))) $
         ClientEnv man url Nothing -- defaultMakeClientRequest
 
@@ -151,11 +185,6 @@ testOrder params@TestOrderParams{..} = do
             (testOrder'
                  (Just pub)
                  params
-           --      topQuantity
-           --      (Just topSymbol)
-           --      (Just topType)
-           --      (Just topSide)
-           --      (Just topTimestamp)
                  (Just ((pack . show) sig))) $
         ClientEnv man url Nothing -- defaultMakeClientRequest
 

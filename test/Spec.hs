@@ -35,13 +35,22 @@ defaultConfig = do
       , H.privateKey = privKey
       }
 
-aOrderParams :: Integer -> H.OrderParams
-aOrderParams t = H.OrderParams
-                { H.opSymbol = "ADAUSDT"
-                , H.opOrderId = Nothing
-                , H.opLimit = Nothing
-                , H.opRecvWindow = Nothing
-                , H.opTimestamp = t
+aAllOrdersParams :: Integer -> H.AllOrdersParams
+aAllOrdersParams t = H.AllOrdersParams
+                { H.aopSymbol = "ADAUSDT"
+                , H.aopOrderId = Nothing
+                , H.aopLimit = Nothing
+                , H.aopRecvWindow = Nothing
+                , H.aopTimestamp = t
+                }
+
+aMyTradesParams :: Integer -> H.MyTradesParams
+aMyTradesParams t = H.MyTradesParams
+                { H.mtpSymbol = "ADAUSDT"
+                , H.mtpFromId = Nothing
+                , H.mtpLimit = Nothing
+                , H.mtpRecvWindow = Nothing
+                , H.mtpTimestamp = t
                 }
 
 aTestOrderParams :: Integer -> H.TestOrderParams
@@ -69,8 +78,8 @@ main = do
       it "Decodes" $
         decode "{\"e\":\"trade\",\"E\":1618586016940,\"s\":\"LINKUSDT\",\"t\":96946464,\"p\":\"40.38450000\",\"q\":\"161.37000000\",\"b\":1809872850,\"a\":1809872814,\"T\":1618586016910,\"m\":false,\"M\":true}" 
           `shouldBe` Just (H.Deal "LINKUSDT" 1618586016910 40.38450000)
-      it "To and from form OrderParams" $
-         P.urlEncodeAsForm (aOrderParams 1) `shouldBe` "symbol=ADAUSDT&timestamp=1"
+      it "To and from form AllOrdersParams" $
+         P.urlEncodeAsForm (aAllOrdersParams 1) `shouldBe` "symbol=ADAUSDT&timestamp=1"
       it "To and from form TestOrderParams" $
          P.urlEncodeAsForm (aTestOrderParams 1) `shouldBe` "quantity=10.0&symbol=ADAUSDT&type=MARKET&side=BUY&timestamp=1"
       --it "To and from form 2" $
@@ -82,16 +91,14 @@ main = do
         -- except beforeAll which is different
       it "Try all orders" $ do
         t <- P.runReaderT (H.api H.getServerTime) config
-        let params =
-                H.OrderParams
-                { H.opSymbol = "ADAUSDT"
-                , H.opOrderId = Nothing
-                , H.opLimit = Nothing
-                , H.opRecvWindow = Nothing
-                , H.opTimestamp = t
-                }
+        let params = aAllOrdersParams t
         orders <- P.runReaderT (H.api (H.allOrders params)) config
         saneOrders orders `shouldBe` True
+      it "Try my trades" $ do
+        t <- P.runReaderT (H.api H.getServerTime) config
+        let params = aMyTradesParams t
+        mytrades <- P.runReaderT (H.api (H.myTrades params)) config
+        saneMyTrades mytrades `shouldBe` True
       it "Try test order" $ do
         t <- P.runReaderT (H.api H.getServerTime) config
         let params = aTestOrderParams t
@@ -99,9 +106,13 @@ main = do
         saneTrade trade `shouldBe` True
 
 
-saneOrders :: Either P.ClientError [H.OrderResponse] -> Bool
+saneOrders :: Either P.ClientError [H.AllOrdersResponseLine] -> Bool
 saneOrders (Left e) = trace (show e) False
-saneOrders (Right l) = length l > 1 && all (\p -> H.orSymbol (p::H.OrderResponse) == "ADAUSDT" ) l
+saneOrders (Right l) = length l > 1 && all (\p -> H.orSymbol (p::H.AllOrdersResponseLine) == "ADAUSDT" ) l
+
+saneMyTrades :: Either P.ClientError [H.MyTradesResponseLine] -> Bool
+saneMyTrades (Left e) = trace (show e) False
+saneMyTrades (Right l) = length l > 1 && all (\p -> H.mtrSymbol (p::H.MyTradesResponseLine) == "ADAUSDT" ) l
 
 saneTrade :: Either P.ClientError P.Object -> Bool
 saneTrade (Left e) = trace (show e) False
