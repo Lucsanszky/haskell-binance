@@ -70,11 +70,6 @@ type BinanceAccountApiTestOrder =
   "order" :>
   "test" :>
   ReqBody '[FormUrlEncoded] TestOrderParams :>
---  QueryParam "quantity" Double :>
---  QueryParam "symbol" Text :>
---  QueryParam "type" OrderType :>
---  QueryParam "side" Side :>
---  QueryParam "timestamp" Integer :>
   QueryParam "signature" Text :>
   Post '[ JSON] Object
 
@@ -102,11 +97,6 @@ allOrders' ::
 testOrder' ::
        Maybe Text
     -> TestOrderParams
-  --  -> Maybe Double
-  --  -> Maybe Text
-  --  -> Maybe OrderType
-  --  -> Maybe Side
-  --  -> Maybe Integer
     -> Maybe Text
     -> ClientM Object
 getServerTime' :<|> allOrders' :<|> testOrder' = client binanceProxy

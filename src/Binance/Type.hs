@@ -182,10 +182,10 @@ instance FromHttpApiData OrderType where
 -- instance ToJSON Response
 
 data TestOrderParams = TestOrderParams
-    { topQuantity         :: !(Maybe Double)
-    , topSymbol           :: !Text
-    , topType             :: !OrderType
+    { topSymbol           :: !Text
     , topSide             :: !Side
+    , topType             :: !OrderType
+    , topQuantity         :: !(Maybe Double)
 --    , topQuoteOrderQty    :: Maybe Double
 --    , topTimeInForce      :: Maybe Text
 --    , topPrice            :: Maybe Double
