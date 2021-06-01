@@ -73,24 +73,24 @@ instance ToForm AllOrdersParams where
         opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 3 }
 
 data AllOrdersResponseLine = AllOrdersResponseLine
-    { orSymbol        :: !Text
-    , orOrderId       :: !Int
-    , orClientOrderId :: !Text
-    , orPrice         :: !Text
-    , orOrigQty       :: !Text
-    , orExecutedQty   :: !Text
-    , orStatus        :: !Text
-    , orTimeInForce   :: !Text
-    , orType          :: !Text
-    , orSide          :: !Text
-    , orStopPrice     :: !Text
-    , orIcebergQty    :: !Text
-    , orTime          :: !Integer
-    , orIsWorking     :: !Bool
+    { aorSymbol        :: !Text
+    , aorOrderId       :: !Int
+    , aorClientOrderId :: !Text
+    , aorPrice         :: !Text
+    , aorOrigQty       :: !Text
+    , aorExecutedQty   :: !Text
+    , aorStatus        :: !Text
+    , aorTimeInForce   :: !Text
+    , aorType          :: !Text
+    , aorSide          :: !Text
+    , aorStopPrice     :: !Text
+    , aorIcebergQty    :: !Text
+    , aorTime          :: !Integer
+    , aorIsWorking     :: !Bool
     } deriving (Eq, Show, Generic)
 
 instance FromJSON AllOrdersResponseLine where
-    parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = uncapitalizeFirst . drop 2}
+    parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = uncapitalizeFirst . drop 3}
 
 instance ToJSON AllOrdersResponseLine
 

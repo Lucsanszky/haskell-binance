@@ -108,7 +108,7 @@ main = do
 
 saneOrders :: Either P.ClientError [H.AllOrdersResponseLine] -> Bool
 saneOrders (Left e) = trace (show e) False
-saneOrders (Right l) = length l > 1 && all (\p -> H.orSymbol (p::H.AllOrdersResponseLine) == "ADAUSDT" ) l
+saneOrders (Right l) = length l > 1 && all (\p -> H.aorSymbol (p::H.AllOrdersResponseLine) == "ADAUSDT" ) l
 
 saneMyTrades :: Either P.ClientError [H.MyTradesResponseLine] -> Bool
 saneMyTrades (Left e) = trace (show e) False
