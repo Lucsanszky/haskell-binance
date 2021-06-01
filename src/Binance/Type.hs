@@ -12,7 +12,7 @@ module Binance.Type
     , WT(..)
     , Side(..)
     , OrderType(..)
-    , Response(..)
+    -- , Response(..)
     , StreamType(..)
     ) where
 
@@ -27,14 +27,6 @@ import           Data.ByteString     (ByteString)
 import           Network.HTTP.Client (Manager)
 import           Prelude             hiding (String)
 
-
--- import Debug.Trace
--- 
--- traceme :: Show a => String -> a -> a
--- traceme s a = a `seq` traceShowPreF s id a
--- 
--- traceShowPreF :: (Show b) => String -> (a -> b) -> a -> a
--- traceShowPreF prefix f a = trace (prefix ++ show (f a)) a
 
 ------------------------------------------------------------
 -- BINANCE DATA
@@ -167,33 +159,33 @@ instance FromHttpApiData OrderType where
     parseUrlPiece "LIMIT_MAKER" = Right LIMIT_MAKER
     parseUrlPiece _ = Left "Invalid order type"
 
-data Response
-    = ACK
-    | RESULT
-    | FULL
-    deriving (Eq, Show, Generic)
-
-instance ToHttpApiData Response where
-    toUrlPiece = pack . show
-    toEncodedUrlPiece = unsafeToEncodedUrlPiece
-
-instance FromHttpApiData Response where
-    parseUrlPiece "ACK" = Right ACK
-    parseUrlPiece "RESULT" = Right RESULT
-    parseUrlPiece "FULL" = Right FULL
-    parseUrlPiece _ =
-        Left
-            "Invalid response type (should be ACK, RESULT or FULL)"
-
-instance FromJSON Response
-
-instance ToJSON Response
+-- data Response
+--     = ACK
+--     | RESULT
+--     | FULL
+--     deriving (Eq, Show, Generic)
+-- 
+-- instance ToHttpApiData Response where
+--     toUrlPiece = pack . show
+--     toEncodedUrlPiece = unsafeToEncodedUrlPiece
+-- 
+-- instance FromHttpApiData Response where
+--     parseUrlPiece "ACK" = Right ACK
+--     parseUrlPiece "RESULT" = Right RESULT
+--     parseUrlPiece "FULL" = Right FULL
+--     parseUrlPiece _ =
+--         Left
+--             "Invalid response type (should be ACK, RESULT or FULL)"
+-- 
+-- instance FromJSON Response
+-- 
+-- instance ToJSON Response
 
 data TestOrderParams = TestOrderParams
-    { topSymbol           :: !Text
-    , topSide             :: !Side
+    { topQuantity         :: !(Maybe Double)
+    , topSymbol           :: !Text
     , topType             :: !OrderType
-    , topQuantity         :: !(Maybe Double)
+    , topSide             :: !Side
 --    , topQuoteOrderQty    :: Maybe Double
 --    , topTimeInForce      :: Maybe Text
 --    , topPrice            :: Maybe Double

@@ -20,15 +20,6 @@ import Data.Char (toLower)
 import Data.List (intercalate)
 import Prelude hiding (getLine, null, putStrLn, readFile)
 
--- import Debug.Trace
--- 
--- traceme :: Show a => String -> a -> a
--- traceme s a = a `seq` traceShowPreF s id a
--- 
--- traceShowPreF :: (Show b) => String -> (a -> b) -> a -> a
--- traceShowPreF prefix f a = trace (prefix ++ show (f a)) a
-
-
 subscribeTo :: String -> ClientApp () -> IO ()
 subscribeTo s = withSocketsDo .  runSecureClient "stream.binance.com" 9443 s
 
@@ -78,12 +69,12 @@ type BinanceAccountApiTestOrder =
   Header "X-MBX-APIKEY" Text :>
   "order" :>
   "test" :>
---  ReqBody '[FormUrlEncoded] TestOrderParams :>
-  QueryParam "quantity" Double :>
-  QueryParam "symbol" Text :>
-  QueryParam "type" OrderType :>
-  QueryParam "side" Side :>
-  QueryParam "timestamp" Integer :>
+  ReqBody '[FormUrlEncoded] TestOrderParams :>
+--  QueryParam "quantity" Double :>
+--  QueryParam "symbol" Text :>
+--  QueryParam "type" OrderType :>
+--  QueryParam "side" Side :>
+--  QueryParam "timestamp" Integer :>
   QueryParam "signature" Text :>
   Post '[ JSON] Object
 
@@ -110,12 +101,12 @@ allOrders' ::
     -> ClientM [OrderResponse]
 testOrder' ::
        Maybe Text
-  --  -> TestOrderParams
-    -> Maybe Double
-    -> Maybe Text
-    -> Maybe OrderType
-    -> Maybe Side
-    -> Maybe Integer
+    -> TestOrderParams
+  --  -> Maybe Double
+  --  -> Maybe Text
+  --  -> Maybe OrderType
+  --  -> Maybe Side
+  --  -> Maybe Integer
     -> Maybe Text
     -> ClientM Object
 getServerTime' :<|> allOrders' :<|> testOrder' = client binanceProxy
@@ -169,11 +160,12 @@ testOrder params@TestOrderParams{..} = do
         runClientM
             (testOrder'
                  (Just pub)
-                 topQuantity
-                 (Just topSymbol)
-                 (Just topType)
-                 (Just topSide)
-                 (Just topTimestamp)
+                 params
+           --      topQuantity
+           --      (Just topSymbol)
+           --      (Just topType)
+           --      (Just topSide)
+           --      (Just topTimestamp)
                  (Just ((pack . show) sig))) $
         ClientEnv man url Nothing -- defaultMakeClientRequest
 
