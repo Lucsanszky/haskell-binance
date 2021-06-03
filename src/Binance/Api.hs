@@ -8,14 +8,16 @@ module Binance.Api
     , binanceStream
     , binanceProxy
     , getServerTime
+    , account
     , testOrder
     ) where
 
 import Binance.Prelude
 import Binance.Type (StreamType, ServerTime(..), BinanceUserApi,
-                     TestOrderParams(..),
-                     AllOrdersParams(..), AllOrdersResponseLine(..),
-                     MyTradesParams(..), MyTradesResponseLine(..),
+                     TestOrderRequest(..),
+                     AllOrdersRequest(..), AllOrdersResponseLine(..),
+                     MyTradesRequest(..), MyTradesResponseLine(..),
+                     AccountRequest(..), AccountResponseStupid(..), AccountResponseBalanceStupid(..),
                      publicKey, privateKey, url, managr, BinanceConfig(..), api, Side(..), OrderType(..),
                      )
 import Data.ByteString (ByteString)
@@ -42,7 +44,7 @@ binanceStream ps = subscribeTo $ makeStreamName ps
 
 ------------------------------------------------------------
 -- BINANCE USER API
---
+
 type BinanceAccountApiTime =
   "time" :>
   Get '[ JSON] ServerTime
@@ -69,11 +71,19 @@ type BinanceAccountApiMyTrades =
   QueryParam "signature" Text :>
   Get '[ JSON] [MyTradesResponseLine]
 
+type BinanceAccountApiAccount =
+  Header "X-MBX-APIKEY" Text :>
+  "account" :>
+  QueryParam "recvWindow" Integer :>
+  QueryParam "timestamp" Integer :>
+  QueryParam "signature" Text :>
+  Get '[ JSON] AccountResponseStupid
+
 type BinanceAccountApiTestOrder =
   Header "X-MBX-APIKEY" Text :>
   "order" :>
   "test" :>
-  ReqBody '[FormUrlEncoded] TestOrderParams :>
+  ReqBody '[FormUrlEncoded] TestOrderRequest :>
   QueryParam "signature" Text :>
   Post '[ JSON] Object
 
@@ -82,6 +92,7 @@ type BinanceAccountApi
         (    BinanceAccountApiTime
         :<|> BinanceAccountApiAllOrders
         :<|> BinanceAccountApiMyTrades
+        :<|> BinanceAccountApiAccount
         :<|> BinanceAccountApiTestOrder
         )
 
@@ -107,12 +118,18 @@ myTrades' ::
     -> Maybe Integer
     -> Maybe Text
     -> ClientM [MyTradesResponseLine]
+account' ::
+       Maybe Text    -- api key
+    -> Maybe Integer -- recvWindow
+    -> Maybe Integer -- timestamp
+    -> Maybe Text    -- sig
+    -> ClientM AccountResponseStupid
 testOrder' ::
        Maybe Text
-    -> TestOrderParams
+    -> TestOrderRequest
     -> Maybe Text
     -> ClientM Object
-getServerTime' :<|> allOrders' :<|> myTrades' :<|> testOrder' = client binanceProxy
+getServerTime' :<|> allOrders' :<|> myTrades' :<|> account' :<|> testOrder' = client binanceProxy
 
 getServerTime :: BinanceUserApi Integer
 getServerTime = do
@@ -130,9 +147,9 @@ sign msg =
         return . hmacGetDigest . hmac secret $ msg
 
 allOrders ::
-       AllOrdersParams
+       AllOrdersRequest
     -> BinanceUserApi (Either ClientError [AllOrdersResponseLine])
-allOrders params@AllOrdersParams {..} = do
+allOrders params@AllOrdersRequest {..} = do
     url <- asks url
     man <- asks managr
     pub <- asks publicKey
@@ -151,9 +168,9 @@ allOrders params@AllOrdersParams {..} = do
         ClientEnv man url Nothing -- defaultMakeClientRequest
 
 myTrades ::
-       MyTradesParams
+       MyTradesRequest
     -> BinanceUserApi (Either ClientError [MyTradesResponseLine])
-myTrades params@MyTradesParams {..} = do
+myTrades params@MyTradesRequest {..} = do
     url <- asks url
     man <- asks managr
     pub <- asks publicKey
@@ -171,10 +188,28 @@ myTrades params@MyTradesParams {..} = do
                  (Just ((pack . show) sig))) $
         ClientEnv man url Nothing -- defaultMakeClientRequest
 
+account ::
+       AccountRequest
+    -> BinanceUserApi (Either ClientError AccountResponseStupid)
+account params@AccountRequest {..} = do
+    url <- asks url
+    man <- asks managr
+    pub <- asks publicKey
+    let msg = urlEncodeAsForm params
+    sig <- sign $ toStrict msg
+    liftIO $
+        runClientM
+            (account'
+                 (Just pub)
+                 apRecvWindow
+                 (Just apTimestamp)
+                 (Just ((pack . show) sig))) $
+        ClientEnv man url Nothing -- defaultMakeClientRequest
+
 testOrder ::
-       TestOrderParams
+       TestOrderRequest
     -> BinanceUserApi (Either ClientError Object)
-testOrder params@TestOrderParams{..} = do
+testOrder params@TestOrderRequest{..} = do
     url <- asks url
     man <- asks managr
     pub <- asks publicKey

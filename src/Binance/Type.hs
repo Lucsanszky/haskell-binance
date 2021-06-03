@@ -3,13 +3,20 @@
 
 module Binance.Type
     ( ServerTime(..)
-    , AllOrdersParams(..)
+    , AllOrdersRequest(..)
     , AllOrdersResponseLine(..)
-    , MyTradesParams(..)
+    , MyTradesRequest(..)
     , MyTradesResponseLine(..)
+    , AccountRequest(..)
+    , AccountResponseStupid(..)
+    , AccountResponseBalanceStupid(..)
+    , saneAccountResponse
+    , AccountResponseSane(..)
+    , AccountResponseBalanceSane(..)
+    , arbTotal
     , BinanceConfig(..)
     , BinanceUserApi(..)
-    , TestOrderParams(..)
+    , TestOrderRequest(..)
     , Deal(..)
     , WT(..)
     , Side(..)
@@ -25,6 +32,7 @@ import           Network.WebSockets (WebSocketsData(..), DataMessage(..))
 import           Binance.Prelude
 import           Data.Aeson (decode)
 import qualified Data.Aeson.Types    as A (Options (..))
+import qualified Data.Text as T
 import           Data.ByteString     (ByteString)
 import           Network.HTTP.Client (Manager)
 import           Prelude             hiding (String)
@@ -55,11 +63,9 @@ newtype ServerTime = ServerTime
 
 instance FromJSON ServerTime
 
-instance ToJSON ServerTime
-
 ----------------------------------------
 
-data AllOrdersParams = AllOrdersParams
+data AllOrdersRequest = AllOrdersRequest
     { aopSymbol     :: !Text
     , aopOrderId    :: Maybe Integer
     , aopLimit      :: Maybe Int
@@ -67,7 +73,7 @@ data AllOrdersParams = AllOrdersParams
     , aopTimestamp  :: !Integer
     } deriving (Eq, Show, Generic)
 
-instance ToForm AllOrdersParams where
+instance ToForm AllOrdersRequest where
     toForm = genericToForm opts
       where
         opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 3 }
@@ -92,11 +98,9 @@ data AllOrdersResponseLine = AllOrdersResponseLine
 instance FromJSON AllOrdersResponseLine where
     parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = uncapitalizeFirst . drop 3}
 
-instance ToJSON AllOrdersResponseLine
-
 ----------------------------------------
 
-data MyTradesParams = MyTradesParams
+data MyTradesRequest = MyTradesRequest
     { mtpSymbol     :: !Text
     , mtpFromId     :: Maybe Integer
     , mtpLimit      :: Maybe Int
@@ -104,7 +108,7 @@ data MyTradesParams = MyTradesParams
     , mtpTimestamp  :: !Integer
     } deriving (Eq, Show, Generic)
 
-instance ToForm MyTradesParams where
+instance ToForm MyTradesRequest where
     toForm = genericToForm opts
       where
         opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 3 }
@@ -119,7 +123,7 @@ data MyTradesResponseLine = MyTradesResponseLine
     , mtrQuoteQty         :: !Text
     , mtrCommission       :: !Text
     , mtrCommissionAsset  :: !Text
-    , mtrTime             :: !Double
+    , mtrTime             :: !Integer
     , mtrIsBuyer          :: !Bool
     , mtrIsMaker          :: !Bool
     , mtrIsBestMatch      :: !Bool
@@ -128,7 +132,57 @@ data MyTradesResponseLine = MyTradesResponseLine
 instance FromJSON MyTradesResponseLine where
     parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = uncapitalizeFirst . drop 3}
 
-instance ToJSON MyTradesResponseLine
+----------------------------------------
+
+data AccountRequest = AccountRequest
+    { apRecvWindow :: Maybe Integer
+    , apTimestamp  :: !Integer
+    } deriving (Eq, Show, Generic)
+
+instance ToForm AccountRequest where
+    toForm = genericToForm opts
+      where
+        opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 2 }
+
+data AccountResponseBalanceStupid = AccountResponseBalanceStupid
+  { arbsAsset  :: Text
+  , arbsFree   :: Text
+  , arbsLocked :: Text
+  } deriving (Eq, Show, Generic)
+
+instance FromJSON AccountResponseBalanceStupid where
+    parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = uncapitalizeFirst . drop 4}
+
+data AccountResponseStupid = AccountResponseStupid
+  { arsUpdateTime :: Integer
+  , arsBalances :: [AccountResponseBalanceStupid]
+  } deriving (Eq, Show, Generic)
+
+instance FromJSON AccountResponseStupid where
+    parseJSON = genericParseJSON $ defaultOptions {A.fieldLabelModifier = uncapitalizeFirst . drop 3}
+
+data AccountResponseBalanceSane = AccountResponseBalanceSane
+  { arbAsset  :: Text
+  , arbFree   :: Float
+  , arbLocked :: Float
+  } deriving (Eq, Show, Generic)
+
+arbTotal :: AccountResponseBalanceSane -> Float
+arbTotal AccountResponseBalanceSane{..} = arbFree + arbLocked
+
+data AccountResponseSane = AccountResponseSane
+  { arUpdateTime :: Integer
+  , arBalances :: [AccountResponseBalanceSane]
+  } deriving (Eq, Show, Generic)
+
+saneAccountResponse :: AccountResponseStupid -> AccountResponseSane
+saneAccountResponse ars = AccountResponseSane (arsUpdateTime ars) (saneAccountResponseBalance <$> arsBalances ars)
+
+saneAccountResponseBalance :: AccountResponseBalanceStupid -> AccountResponseBalanceSane
+saneAccountResponseBalance arbs = AccountResponseBalanceSane
+  (arbsAsset arbs)
+  (read $ T.unpack $ arbsFree arbs)
+  (read $ T.unpack $ arbsLocked arbs)
 
 ----------------------------------------
 
@@ -139,7 +193,6 @@ data Side
 
 instance FromJSON Side
 
-instance ToJSON Side
 
 instance ToHttpApiData Side where
     toUrlPiece = pack . show
@@ -162,8 +215,6 @@ data OrderType
     deriving (Eq, Show, Generic)
 
 instance FromJSON OrderType
-
-instance ToJSON OrderType
 
 instance ToHttpApiData OrderType where
     toUrlPiece = pack . show
@@ -199,9 +250,7 @@ instance FromHttpApiData OrderType where
 -- 
 -- instance FromJSON Response
 -- 
--- instance ToJSON Response
-
-data TestOrderParams = TestOrderParams
+data TestOrderRequest = TestOrderRequest
     { topSymbol           :: !Text
     , topSide             :: !Side
     , topType             :: !OrderType
@@ -217,12 +266,12 @@ data TestOrderParams = TestOrderParams
     , topTimestamp        :: !Integer
     } deriving (Eq, Show, Generic)
 
-instance ToForm TestOrderParams where
+instance ToForm TestOrderRequest where
     toForm = genericToForm opts
       where
         opts = FormOptions {fieldLabelModifier = uncapitalizeFirst . drop 3}
 
-instance FromForm TestOrderParams
+instance FromForm TestOrderRequest
 
 
 data StreamType
@@ -241,7 +290,7 @@ instance Show StreamType where
 data Deal = Deal
   { symbol :: Text
   , time :: Integer
-  , price :: Double
+  , price :: Float
   } deriving (Eq)
 
 instance FromJSON Deal where

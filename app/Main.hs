@@ -35,18 +35,20 @@ defaultConfig = do
 
 app :: ClientApp ()
 app conn = do
-    _ <-
-        forkIO $
-        forever $ do
+--    _ <-
+--      forkIO $
+    forever $ do
             msg :: Maybe H.WT <- receiveData conn
             liftIO $ putStrLn ( msg & maybe "Unparsable" (pack . showForFile) ) --  >>= decodeStrict & maybe "" show )
-    loop
-    sendClose conn ("Bye!" :: Text)
-  where
-    loop =
-        getLine >>= \line ->
-            unless (Data.Text.null line) $
-            sendTextData conn line >> loop
+    -- loop
+    -- sendClose conn ("Bye!" :: Text)
+
+--    pure ()
+--  where
+--    loop =
+--        getLine >>= \line ->
+--            unless (Data.Text.null line) $
+--            sendTextData conn line >> loop
 
 showForFile :: H.WT -> String
 showForFile (H.WT _ (H.Deal s t p)) = unpack s ++ " : " ++ show t ++ " " ++ show p
