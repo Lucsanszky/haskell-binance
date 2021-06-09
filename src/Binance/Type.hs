@@ -25,6 +25,7 @@ module Binance.Type
     , StreamType(..)
     ) where
 
+import Data.Int
 import Data.Time.Format
 import Data.Time
 import Data.Char
@@ -290,6 +291,7 @@ instance Show StreamType where
 data Deal = Deal
   { symbol :: Text
   , time :: Integer
+  , tradeId :: Int32
   , price :: Float
   } deriving (Eq)
 
@@ -298,6 +300,7 @@ instance FromJSON Deal where
     Deal
       <$> o .: "s"
       <*> o .: "T"
+      <*> o .: "t"
       <*> (read <$> o .: "p")
 
 
@@ -305,6 +308,7 @@ instance ToJSON Deal where
   toJSON Deal{..} =
     object [ "s" .= symbol
            , "T" .= time
+           , "t" .= tradeId
            , "p" .= price
            ]
 
@@ -338,14 +342,14 @@ instance WebSocketsData (Maybe WT) where
   toLazyByteString = encode
 
 instance Show Deal where
-  show (Deal s t p) =
+  show (Deal s t _i p) =
     let tm = parseTimeM True defaultTimeLocale "%s" (show $ t `div` 1000) :: Maybe UTCTime
     in unpack s ++ " " ++ show tm ++ " " ++ show p
 
-instance Read Deal where
-  readsPrec _ s =
-    let (ss:ts:ps:_) = words s
-     in [(Deal (pack ss) (read ts) (read ps), "")]
+-- instance Read Deal where
+--   readsPrec _ s =
+--     let (ss:ts:ps:_) = words s
+--      in [(Deal (pack ss) (read ts) (read ps), "")]
 
 instance Show WT where
   show (WT _ t) = show t

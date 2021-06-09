@@ -76,8 +76,8 @@ main = do
   hspec $ do
     describe "All tests" $ do
       it "Decodes" $
-        decode "{\"e\":\"trade\",\"E\":1618586016940,\"s\":\"LINKUSDT\",\"t\":96946464,\"p\":\"40.38450000\",\"q\":\"161.37000000\",\"b\":1809872850,\"a\":1809872814,\"T\":1618586016910,\"m\":false,\"M\":true}" 
-          `shouldBe` Just (H.Deal "LINKUSDT" 1618586016910 40.38450000)
+        decode "{\"e\":\"trade\",\"E\":1618586016940,\"s\":\"LINKUSDT\",\"t\":123,\"p\":\"40.38450000\",\"q\":\"161.37000000\",\"b\":1809872850,\"a\":1809872814,\"T\":1618586016910,\"m\":false,\"M\":true}" 
+          `shouldBe` Just (H.Deal "LINKUSDT" 1618586016910 123 40.38450000)
       it "To and from form AllOrdersRequest" $
          P.urlEncodeAsForm (aAllOrdersRequest 1) `shouldBe` "symbol=ADAUSDT&timestamp=1"
       it "To and from form TestOrderRequest" $
