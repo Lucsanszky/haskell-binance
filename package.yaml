@@ -1,0 +1,77 @@
+name:                haskell-binance
+version:             0.1.0.0
+github:              "Lucsanszky/haskell-binance"
+license:             BSD3
+author:              "Lucsanszky"
+maintainer:          "dan.lucsanszky@gmail.com"
+# copyright:           "Lucsanszky"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/githubuser/binance-haskell#readme>
+
+dependencies:
+- base
+- aeson
+- bytestring
+- cryptonite
+- http-api-data
+- http-client
+- http-client-tls
+- mtl
+- network
+- servant
+- servant-client
+- text
+- websockets
+- wuss
+- time
+
+library:
+  source-dirs: src
+
+executables:
+  haskell-binance-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - haskell-binance
+
+tests:
+  haskell-binance-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - haskell-binance
+    - hspec
+    - containers
+
+default-extensions:
+- DataKinds
+- DeriveGeneric
+- GeneralizedNewtypeDeriving
+- NamedFieldPuns
+- NoImplicitPrelude
+- OverloadedLists
+- OverloadedStrings
+- RecordWildCards
+- TypeApplications
+- TypeOperators
+

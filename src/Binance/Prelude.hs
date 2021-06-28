@@ -2,6 +2,18 @@ module Binance.Prelude
     ( module X
     ) where
 
+import           Prelude as X
+    ( String
+    , Either (..)
+    , IO
+    , Maybe (..)
+    , print
+    , (>>)
+    , pure
+    , ($)
+    , (>>=)
+    )
+
 import           Control.Concurrent       as X (forkIO)
 import           Control.Monad            as X
     ( forever
@@ -75,7 +87,7 @@ import           Servant.Client           as X
     , ClientEnv (..)
     , ClientM
     , Scheme (Https)
-    , ServantError
+    , ClientError
     , client
     , runClientM
     )
